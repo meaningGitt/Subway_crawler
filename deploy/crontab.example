@@ -1,0 +1,4 @@
+# Cronie or another cron that explicitly supports CRON_TZ (not macOS cron).
+CRON_TZ=Asia/Seoul
+TZ=Asia/Seoul
+0 9,22 * * * cd /opt/subway-crawler && .venv/bin/python -m subway_crawler run --root /var/lib/subway-crawler >> /var/log/subway-cron.log 2>&1

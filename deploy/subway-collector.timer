@@ -1,0 +1,10 @@
+[Unit]
+Description=Subway collection at 09:00 and 22:00 Asia/Seoul
+[Timer]
+OnCalendar=*-*-* 09:00:00 Asia/Seoul
+OnCalendar=*-*-* 22:00:00 Asia/Seoul
+AccuracySec=1s
+Persistent=true
+Unit=subway-collector.service
+[Install]
+WantedBy=timers.target

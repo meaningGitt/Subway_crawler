@@ -1,0 +1,66 @@
+{
+  "timezone": "Asia/Seoul",
+  "expected_lines": [
+    "1호선",
+    "2호선",
+    "3호선",
+    "4호선",
+    "5호선",
+    "6호선",
+    "7호선",
+    "8호선",
+    "9호선",
+    "인천1호선",
+    "인천2호선",
+    "공항철도",
+    "경의중앙선",
+    "경춘선",
+    "수인분당선",
+    "신분당선",
+    "경강선",
+    "서해선",
+    "우이신설선",
+    "신림선",
+    "의정부경전철",
+    "용인경전철",
+    "김포골드라인",
+    "GTX-A"
+  ],
+  "sources": [
+    {
+      "id": "kric_stations",
+      "kind": "stations",
+      "dataset_id": 32,
+      "metadata_url": "https://data.kric.go.kr/rips/M_01_01/detail.do?id=32",
+      "catalog_url": "https://www.data.go.kr/data/15013205/standard.do",
+      "license": "이용허락범위 제한 없음",
+      "automation_allowed": true,
+      "published_cadence": "포털: 연간 / 제공기관: 없음(비정기)",
+      "request_interval_seconds": 2,
+      "revalidate_days": 7
+    },
+    {
+      "id": "kric_korail_lines",
+      "kind": "lines",
+      "dataset_id": 31,
+      "metadata_url": "https://data.kric.go.kr/rips/M_01_01/detail.do?id=31",
+      "catalog_url": "https://www.data.go.kr/data/15013204/standard.do",
+      "license": "이용허락범위 제한 없음",
+      "automation_allowed": true,
+      "published_cadence": "제공기관: 없음(비정기)",
+      "request_interval_seconds": 2,
+      "revalidate_days": 7
+    },
+    {
+      "id": "kric_station_inventory",
+      "kind": "inventory",
+      "metadata_url": "https://data.kric.go.kr/rips/M_04_02/intro.do",
+      "catalog_url": "https://data.kric.go.kr/rips/M_04_02/detail.do?id=17",
+      "license": "국가철도공단 공개 배포 역 코드 목록; 출처 표기",
+      "automation_allowed": true,
+      "published_cadence": "자료실 비정기 게시; 최신 코드정보 리스트 자동 탐색",
+      "request_interval_seconds": 2,
+      "revalidate_days": 7
+    }
+  ]
+}
