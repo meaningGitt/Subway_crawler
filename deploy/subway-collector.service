@@ -1,0 +1,13 @@
+[Unit]
+Description=Metropolitan subway data collector
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=oneshot
+User=subway
+WorkingDirectory=/opt/subway-crawler
+Environment=TZ=Asia/Seoul
+EnvironmentFile=-/etc/subway-crawler.env
+ExecStart=/opt/subway-crawler/.venv/bin/python -m subway_crawler run --root /var/lib/subway-crawler
+TimeoutStartSec=1200
+UMask=0077
