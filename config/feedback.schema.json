@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "향후 동의 기반 좌석 추천 검증 피드백 (이번 작업에서 수집하지 않음)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feedback_id", "recommendation_id", "dataset_snapshot_id", "consent_version"],
+  "properties": {
+    "feedback_id": {"type": "string"},
+    "recommendation_id": {"type": "string"},
+    "dataset_snapshot_id": {"type": "string"},
+    "model_version": {"type": ["string", "null"]},
+    "consent_version": {"type": "string"},
+    "recommended_route": {"type": "array", "items": {"type": "string"}},
+    "recommended_car": {"type": ["integer", "null"], "minimum": 1},
+    "actual_route": {"type": "array", "items": {"type": "string"}},
+    "actual_car": {"type": ["integer", "null"], "minimum": 1},
+    "seat_obtained": {"type": ["boolean", "null"]},
+    "seconds_until_seated": {"type": ["integer", "null"], "minimum": 0},
+    "stations_until_seated": {"type": ["integer", "null"], "minimum": 0},
+    "trip_time_bucket": {"type": ["string", "null"]},
+    "feedback_observed_at": {"type": ["string", "null"], "format": "date-time"},
+    "statistical_recommendation_score": {"type": ["number", "null"]},
+    "calibrated_seat_probability": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+  },
+  "$comment": "확률은 실제 좌석 관측 기반 학습·시간 분리 검증·확률 보정 이후에만 사용. 초기에는 null. 점수와 확률을 별도 관리. 개인 ID·연락처·정밀 위치는 저장하지 않는 설계 제안이며 보유기간/삭제 정책은 구현 전에 정의."
+}
