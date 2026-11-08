@@ -29,7 +29,7 @@ class AcquisitionError(SourceError):
 class DownloadClient(Client):
     def request_file(self, method, url, destination, **kwargs):
         """Public URLs only. Retry transport errors; honor server limits, never bypass CAPTCHA."""
-        if urlparse(url).hostname not in {'www.data.go.kr', 'data.kric.go.kr', 'data.seoul.go.kr', 'info.korail.com'}:
+        if urlparse(url).hostname not in {'www.data.go.kr', 'data.kric.go.kr', 'data.seoul.go.kr', 'datafile.seoul.go.kr', 'info.korail.com'}:
             raise AcquisitionError('download host changed; registry review needed', 'schema')
         destination = Path(destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -98,6 +98,9 @@ def catalog(page):
 def discover(source, client):
     _, _, body = client.get(source['url'])
     page = body.decode('utf-8')
+    if source['adapter'] in ('seoul_sheet', 'seoul_file'):
+        from .seoul import discover_seoul
+        return discover_seoul(source, client, body)
     if source['adapter'] == 'kric':
         meta = metadata(body, {'metadata_url': source['url'], 'dataset_id': 900})
         # License evidence from the linked national standard catalog is retained too.
@@ -123,6 +126,9 @@ def discover(source, client):
 
 
 def download(source, meta, client, path):
+    if source['adapter'] in ('seoul_sheet', 'seoul_file'):
+        result = client.request_file('POST', meta['download_url'], path, data=meta['download_params'])
+        return result | {k: meta[k] for k in ('download_url', 'download_params', 'original_filename')}
     if source['adapter'] == 'kric':
         return client.request_file('GET', meta['url'], path)
     a, b, c, d = meta['download_args']

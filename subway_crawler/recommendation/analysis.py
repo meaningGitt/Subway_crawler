@@ -126,6 +126,12 @@ class Builder:
     def ridership(self, path, sid):
         d = read_csv(path)
         prefix = 'historical_' if sid == 'metro_ridership' else ''
+        line9 = self.sources[sid]['kind'] == 'line9_ridership'
+        if line9:
+            prefix = sid+'_'
+            d = d.rename(columns={'날짜':'수송일자','역사명':'역명','구분':'승하차구분'})
+            d['호선'] = d['호선'].map({'9':'9호선', '9호선':'9호선'})
+            d['승하차구분'] = d['승하차구분'].map({'순승차':'승차','순하차':'하차'})
         if sid == 'metro_ridership_types':
             d=d.rename(columns={'호선명':'호선','06시간대이전':'06시이전','24시간대이후':'24시이후'})
             d['source_row']=d.index+2
@@ -145,18 +151,41 @@ class Builder:
         if not required.issubset(d):
             raise SourceError('ridership schema changed')
         if 'source_row' not in d:d['source_row'] = d.index + 2
-        bins = [c for c in d if '시간대' in c or c in ('06시이전', '24시이후')]
-        if len(bins) != 20:
+        bins = [c for c in d if (bool(re.fullmatch(r'\d{2}시-\d{2}시',c)) if line9 else '시간대' in c or c in ('06시이전', '24시이후'))]
+        if len(bins) != (24 if line9 else 20):
             raise SourceError('ridership time-bin schema changed')
+        if line9:
+            for col in bins:
+                # Some 2025 months use quoted thousands separators. Do not turn malformed
+                # strings such as 1,2 into 12; only the strict integer grouping is normalized.
+                grouped = d[col].str.fullmatch(r'\d{1,3}(?:,\d{3})+',na=False)
+                d.loc[grouped,col] = d.loc[grouped,col].str.replace(',','',regex=False)
         d = d.rename(columns={'수송일자':'service_date','호선':'line','역번호':'station_code','역명':'station_name','승하차구분':'flow'})
         keys = ['service_date','line','station_code','flow']
+        excluded = 0
+        if line9:
+            # Published 2025 file contains conflicting repeated dates. Preserve every conflicting
+            # raw row, exclude the entire key rather than select a value or guess the intended date.
+            compare = keys+['station_name']+bins
+            conflict = d.drop_duplicates(compare).duplicated(keys,keep=False)
+            conflict_keys = d.drop_duplicates(compare).loc[conflict,keys].drop_duplicates()
+            bad = pd.MultiIndex.from_frame(d[keys]).isin(pd.MultiIndex.from_frame(conflict_keys))
+            if bad.any():
+                rejected = d.loc[bad].copy(); rejected['quality_valid'] = False
+                rejected['exclusion_reason'] = 'conflicting_duplicate_date_station_flow'
+                self.save(prefix+'conflicts',rejected,sid,'원본 행: 같은 날짜·역·승하차에 다른 값','집계 통계',[],
+                          '원본 날짜 수정·값 선택 금지. 관련 키 전체를 분석 제외. 원본 행번호로 추적.', ['raw_sha256','source_row'])
+            excluded = int(bad.sum()); d = d.loc[~bad].copy()
         d,q = self.clean(d, keys, keys+['station_name'])
+        q['excluded_conflicting_rows'] = excluded
         dates = pd.to_datetime(d.service_date, errors='coerce')
         d['weekday'] = dates.dt.dayofweek.astype('Int64')
         d['is_holiday'] = pd.Series(pd.NA, index=d.index, dtype='boolean')
         d['direction'] = pd.NA
         d['quality_valid'] &= dates.notna() & d.flow.isin(['승차','하차'])
-        d = self.mapper.attach(d, operator='S1')
+        # OA-22441's fare-system codes (4126...) are not KRIC codes (926...).
+        # Unique line+name mapping is explicit; retain original codes without numeric rewriting.
+        d = self.mapper.attach(d, operator='S9' if line9 else 'S1', code='absent_code' if line9 else 'station_code')
         idcols = keys+['station_name','source_row','weekday','is_holiday','direction','station_key','mapping_status','quality_valid']
         wide = d[idcols+bins].copy()
         self.save(prefix+'ridership_daily_wide',wide,sid,'역·영업일·승하차 구분·원본 시간대 열','집계 통계',['alighting','route'],
@@ -171,7 +200,7 @@ class Builder:
         long=pd.concat(parts,ignore_index=True)
         q['invalid_cells']=int((~long.quality_valid).sum());self.quality[sid]=q
         self.save(prefix+'ridership_hourly',long,sid,'역·영업일·원본 시간대·승하차 구분','집계 통계',['alighting','route'],
-                  '06시 이전/24시 이후는 개방 구간 그대로 보존. 방향 없음; 결측은 0 아님.',keys+['time_bin'],csv=False)
+                  '원본 시간구간을 보존. 방향 없음; 결측은 0 아님.',keys+['time_bin'],csv=False)
         valid=long[long.quality_valid & long.mapping_status.eq('matched')]
         group=['station_key','station_name','line','weekday','time_bin','flow']
         agg=valid.groupby(group,dropna=False).agg(mean_passengers=('passengers','mean'),median_passengers=('passengers','median'),
@@ -182,8 +211,15 @@ class Builder:
                   '8일 미만은 운영상 검토 기준이며 정확도 보장이 아님. 공휴일은 일반 요일 안에 섞임.',group+['observation_start','observation_end'])
         self.save(prefix+'alighting_features',agg[agg.flow.eq('하차')],sid,'역·요일·시간대','집계 통계',['alighting'],
                   '하차 수요 사전값 후보. 열차 하차량·빈 좌석·좌석 확률이 아님. 방향 미상.',group+['observation_start','observation_end'])
-        self.context['hourly']=valid.groupby(['time_bin','flow']).passengers.mean().unstack().reindex(bins).reset_index().to_dict('records')
-        self.context['top_alighting']=agg[agg.flow.eq('하차')].sort_values('mean_passengers',ascending=False).head(15).to_dict('records')
+        if not line9:
+            self.context['hourly']=valid.groupby(['time_bin','flow']).passengers.mean().unstack().reindex(bins).reset_index().to_dict('records')
+            self.context['top_alighting']=agg[agg.flow.eq('하차')].sort_values('mean_passengers',ascending=False).head(15).to_dict('records')
+
+    line9_ridership = ridership
+
+    def monthly_ridership(self, path, sid):
+        from .monthly import build_monthly
+        build_monthly(self, path, sid)
 
     def segment(self,path,sid):
         d=read_csv(path).rename(columns={'구분':'day_type','요일구분':'day_type','호선':'line','역번호':'station_code','역명':'station_name','출발역':'station_name','상하구분':'direction'})

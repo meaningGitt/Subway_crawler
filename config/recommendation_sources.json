@@ -99,6 +99,46 @@
       "license": "전국도시철도운행정보표준데이터 이용허락범위 제한 없음"
     },
     {
+      "id": "seoul_monthly_hourly",
+      "name": "서울시 수도권 호선별 역별 시간대별 월간 승하차",
+      "adapter": "seoul_sheet",
+      "kind": "monthly_ridership",
+      "priority": "P0",
+      "cadence": "월간",
+      "suffix": ".csv",
+      "dataset_id": "OA-12252",
+      "url": "https://data.seoul.go.kr/dataList/OA-12252/S/1/datasetView.do",
+      "revalidate_days": 30,
+      "license": "공공누리 제1유형: 출처표시; 매 실행 검증"
+    },
+    {
+      "id": "metro9_daily",
+      "name": "서울교통공사 9호선 2·3단계 일별 시간대별 승하차 최신 파일",
+      "adapter": "seoul_file",
+      "kind": "line9_ridership",
+      "priority": "P0",
+      "cadence": "비정기",
+      "suffix": ".csv",
+      "dataset_id": "OA-22441",
+      "url": "https://data.seoul.go.kr/dataList/OA-22441/F/1/datasetView.do",
+      "revalidate_days": 30,
+      "license": "공공누리 제1유형: 출처표시; 매 실행 검증"
+    },
+    {
+      "id": "metro9_daily_2025",
+      "name": "서울교통공사 9호선 2·3단계 2025년 일별 시간대별 승하차",
+      "adapter": "seoul_file",
+      "kind": "line9_ridership",
+      "priority": "P0",
+      "cadence": "비정기",
+      "suffix": ".csv",
+      "dataset_id": "OA-22441",
+      "url": "https://data.seoul.go.kr/dataList/OA-22441/F/1/datasetView.do",
+      "revalidate_days": 30,
+      "license": "공공누리 제1유형: 출처표시; 매 실행 검증",
+      "filename_contains": "20251231"
+    },
+    {
       "id": "korail_monthly",
       "name": "코레일 2026년 월별 시간대별 승하차",
       "adapter": "review",
