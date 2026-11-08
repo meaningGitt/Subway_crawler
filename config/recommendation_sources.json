@@ -1,0 +1,150 @@
+{
+  "timezone": "Asia/Seoul",
+  "sources": [
+    {
+      "id": "metro_ridership",
+      "name": "서울교통공사 역별 일별 시간대별 승하차",
+      "adapter": "data_go",
+      "kind": "ridership",
+      "priority": "P0",
+      "cadence": "연간",
+      "suffix": ".csv",
+      "url": "https://www.data.go.kr/data/15048032/fileData.do",
+      "revalidate_days": 30,
+      "license": "이용허락범위 제한 없음; 매 실행 검증"
+    },
+    {
+      "id": "metro_ridership_types",
+      "name": "서울교통공사 승객유형별 승하차",
+      "adapter": "data_go",
+      "kind": "ridership_types",
+      "priority": "P0",
+      "cadence": "연간",
+      "suffix": ".csv",
+      "url": "https://www.data.go.kr/data/15099330/fileData.do",
+      "revalidate_days": 30,
+      "license": "이용허락범위 제한 없음; 매 실행 검증"
+    },
+    {
+      "id": "korail_od",
+      "name": "코레일 수도권 전철 역간 여객발착",
+      "adapter": "data_go",
+      "kind": "od",
+      "priority": "P0",
+      "cadence": "연간",
+      "suffix": ".csv",
+      "url": "https://www.data.go.kr/data/3037647/fileData.do",
+      "revalidate_days": 30,
+      "license": "이용허락범위 제한 없음; 매 실행 검증"
+    },
+    {
+      "id": "metro_segment",
+      "name": "서울교통공사 구간 혼잡도",
+      "adapter": "data_go",
+      "kind": "segment",
+      "priority": "P1",
+      "cadence": "분기",
+      "suffix": ".csv",
+      "url": "https://www.data.go.kr/data/15071311/fileData.do",
+      "revalidate_days": 30,
+      "license": "이용허락범위 제한 없음; 매 실행 검증"
+    },
+    {
+      "id": "metro_cars",
+      "name": "서울교통공사 4호선 칸별 혼잡도",
+      "adapter": "data_go",
+      "kind": "cars",
+      "priority": "P1",
+      "cadence": "월간",
+      "suffix": ".zip",
+      "url": "https://www.data.go.kr/data/15167486/fileData.do",
+      "revalidate_days": 30,
+      "license": "이용허락범위 제한 없음; 매 실행 검증"
+    },
+    {
+      "id": "metro_transfer",
+      "name": "서울교통공사 환승역 환승인원",
+      "adapter": "data_go",
+      "kind": "transfer",
+      "priority": "P1",
+      "cadence": "연간",
+      "suffix": ".csv",
+      "url": "https://www.data.go.kr/data/15062858/fileData.do",
+      "revalidate_days": 30,
+      "license": "이용허락범위 제한 없음; 매 실행 검증"
+    },
+    {
+      "id": "metro_inflow",
+      "name": "서울교통공사 월별 환승유입",
+      "adapter": "data_go",
+      "kind": "inflow",
+      "priority": "P1",
+      "cadence": "연간",
+      "suffix": ".csv",
+      "url": "https://www.data.go.kr/data/15044245/fileData.do",
+      "revalidate_days": 30,
+      "license": "이용허락범위 제한 없음; 매 실행 검증"
+    },
+    {
+      "id": "kric_timetable",
+      "name": "전국 도시철도 운행정보 중 수도권",
+      "adapter": "kric",
+      "kind": "timetable",
+      "priority": "P0",
+      "cadence": "비정기",
+      "suffix": ".xlsx",
+      "url": "https://data.kric.go.kr/rips/M_01_01/detail.do?id=900",
+      "license_url": "https://www.data.go.kr/data/15013206/standard.do",
+      "revalidate_days": 7,
+      "license": "전국도시철도운행정보표준데이터 이용허락범위 제한 없음"
+    },
+    {
+      "id": "korail_monthly",
+      "name": "코레일 2026년 월별 시간대별 승하차",
+      "adapter": "review",
+      "kind": "ridership",
+      "priority": "P0",
+      "cadence": "확인 필요",
+      "url": "https://info.korail.com/info/selectBbsNttView.do?bbsNo=425&key=867&nttNo=26267",
+      "status": "추가 권한 필요",
+      "reason": "2026-09 XLSX 원본 다운로드 성공. 게시물 공공누리4유형(상업적 이용금지·변경금지); 추천용 가공 제외, 이용허락 확인 필요",
+      "license": "별도 확인 필요"
+    },
+    {
+      "id": "metro_fast_exit",
+      "name": "서울교통공사 빠른 하차정보",
+      "adapter": "review",
+      "kind": "fast_exit",
+      "priority": "P2",
+      "cadence": "확인 필요",
+      "url": "https://www.data.go.kr/data/15143840/openapi.do",
+      "status": "추가 권한 필요",
+      "reason": "API 활용승인·인증키 필요. 키 없이 실제 응답 확보하지 않음",
+      "license": "별도 확인 필요"
+    },
+    {
+      "id": "car_boarding",
+      "name": "칸별 승하차 분포",
+      "adapter": "review",
+      "kind": "car_boarding",
+      "priority": "P2",
+      "cadence": "확인 필요",
+      "url": "https://data.seoul.go.kr/",
+      "status": "수집 불가",
+      "reason": "공식 원시자료 다운로드/API를 이번 조사에서 확인하지 못함. 비공개 여부는 기관 확인 필요",
+      "license": "별도 확인 필요"
+    },
+    {
+      "id": "ktdb_od",
+      "name": "국가교통DB OD 보완",
+      "adapter": "review",
+      "kind": "od",
+      "priority": "P0",
+      "cadence": "확인 필요",
+      "url": "https://www.ktdb.go.kr/www/contents.do?key=24",
+      "status": "추가 권한 필요",
+      "reason": "자료신청 및 이용조건 확인 필요. 교통존 OD와 역간 OD를 혼용하지 않음",
+      "license": "별도 확인 필요"
+    }
+  ]
+}

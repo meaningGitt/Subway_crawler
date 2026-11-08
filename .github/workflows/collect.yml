@@ -52,6 +52,10 @@ jobs:
           FORCE_REFRESH: ${{ inputs.force }}
           SCHEDULE: ${{ github.event.schedule }}
         run: python scripts/actions_run.py
+      - name: Check recommendation source updates
+        if: ${{ always() && steps.collect.outcome != 'skipped' }}
+        working-directory: app
+        run: python scripts/recommendation_check.py
       - name: Persist cumulative state even after source failures
         if: ${{ always() && steps.collect.outcome != 'skipped' }}
         working-directory: state
@@ -78,5 +82,6 @@ jobs:
             state/runtime/exports
             state/runtime/collection.sqlite
             state/runtime/collection.log*
+            state/runtime/recommendation-metadata/runs
           retention-days: 90
           if-no-files-found: warn
