@@ -21,6 +21,10 @@ FIELDS = {
  'reference_date':('원본 데이터 기준일; 시간표 시행일과 다름','날짜'),
  'effective_date':('시간표 시행일; 원본 미제공이면 결측','날짜'),
  'period':('월별 집계 기준월','YYYY-MM'), 'year':('연간 집계 기준연도','연도'),
+ 'provider_processed_date':('제공기관이 표시한 작업일자; 관측일·수집일과 구분','YYYYMMDD'),
+ 'observed_hour_bins':('해당 역·월에 유효하게 확보된 하차 시간구간 수; 관측 일수가 아님','구간'),
+ 'within_station_month_alighting_share':('해당 역·월의 24시간 총 하차량 중 시간대 비중; 좌석 확률 아님','0~1'),
+ 'source_time_column':('원본 CSV의 시간대·승하차 컬럼명','문자'),
  'weekday':('영업일에서 계산한 요일: 월0~일6, 공휴일 여부와 별개','0~6'),
  'day_type':('기관이 공표한 요일구분 그대로; 평일/휴일 의미는 출처별 상이','문자'),
  'is_holiday':('공식 공휴일 달력과 검증 전에는 미상','boolean'),
@@ -80,7 +84,10 @@ def table(rows, columns):
 
 def coverage(builder):
     inventory=builder.mapper.inventory
-    category={'승하차 통계':['ridership_hourly'], 'OD 통행량':['od_annual'], '열차 시간표':['timetable_stops'],
+    daily=['alighting_features','metro9_daily_alighting_features','metro9_daily_2025_alighting_features']
+    monthly=['monthly_alighting_features']
+    category={'승하차 통계':daily+monthly, '일별·요일별 승하차':daily, '월별 시간대 승하차':monthly,
+              'OD 통행량':['od_annual'], '열차 시간표':['timetable_stops'],
               '구간별 혼잡도':['segment_congestion'],'칸별 혼잡도':['car_observations'],
               '환승 수요':['transfer_demand'],'빠른하차 정보':[]}
     rows=[]
@@ -91,8 +98,10 @@ def coverage(builder):
             observed=set().union(*(set(builder.datasets.get(n,{}).get('station_keys',[])) for n in names))
             n=len(keys & observed)
             # Even all station matches do not establish complete dates/trains/directions.
-            r[cat]=f'일부 확보 ({n}/{len(g)}역)' if n else ('확인 필요 (코드북/노선 구분 없음)' if cat in ('OD 통행량','환승 수요') and any(nm in builder.datasets for nm in names) else '미확보')
-        r['하차 예측 근거']='시간대별 개찰구 통계' if '일부 확보' in r['승하차 통계'] else '미확보'
+            in_scope = (cat=='OD 통행량' and g.RAIL_OPR_ISTT_CD.eq('KR').all()) or (cat=='환승 수요' and g.RAIL_OPR_ISTT_CD.eq('S1').all())
+            r[cat]=f'일부 확보 ({n}/{len(g)}역)' if n else ('확인 필요 (기관 원본 확보·역 식별 미검증)' if in_scope and any(nm in builder.datasets for nm in names) else '미확보')
+        r['하차 예측 근거']=('일별 시간대·요일 통계; 공휴일 미분류' if '일부 확보' in r['일별·요일별 승하차'] else
+                         '월간 시간대 패턴; 요일·방향 미제공' if '일부 확보' in r['월별 시간대 승하차'] else '미확보')
         r['칸 추천 근거']='4호선 일부 편성 관측' if '일부 확보' in r['칸별 혼잡도'] else '미확보'
         r['경로 추천 근거']='공표 시간표 일부; 시행일 확인 필요' if '일부 확보' in r['열차 시간표'] else '미확보'
         rows.append(r)
@@ -154,15 +163,22 @@ def generate(builder,run):
       '## 공식 출처와 실제 확보 상태','',table(source_rows,['출처','원본 확보','가공','바이트','사유']),'',
       '## 노선·운영기관 커버리지','',
       '분모는 보유 기준 역코드 목록입니다. 물리적 역사 수가 아니며 노선·운영기관 경계역이 중복될 수 있습니다. 전 노선 전체 기간·열차 완전 확보를 의미하는 완료 판정은 하지 않았습니다.',
+      '승하차 커버리지는 유효한 분석용 행의 역 키를 기준으로 합니다. 일별·요일별 통계와 월간 시간대 합계는 별도 표시하며 서로 합산하지 않습니다. OD/환승의 기관 원본 확보는 해당 노선 확보를 보장하지 않습니다.',
       table(cov,list(cov[0])) if cov else '기준목록 없음','',
       '## 품질과 추천 적합도','',table(suitability,['데이터셋','행 수','관측 단위','성격','활용','한계']),'',
       '상세 결측 수·타입·관측 범위는 data_dictionary.csv 및 quality.json, 미매핑 원본 라벨은 station_mapping.csv에서 확인합니다.',
-      table([{'출처':sid,'입력 행':q.get('input_rows'),'중복 행':q.get('duplicate_rows'), '음수·수치 결측':q.get('invalid_value_rows'), '라벨 중복':q.get('duplicate_label_rows',0),'경로 제외':q.get('unusable_edges',0)} for sid,q in builder.quality.items()],['출처','입력 행','중복 행','음수·수치 결측','라벨 중복','경로 제외']),
-      '중복은 자연키 기준이며 상충값은 자동 덮어쓰기하지 않고 출처 가공을 중단합니다. 음수/잘못된 시각은 quality_valid=false로 표시합니다. 100% 초과 혼잡도는 그 자체로 오류가 아닙니다.',
+      table([{'출처':sid,'입력 행':q.get('input_rows'),'중복 행':q.get('duplicate_rows'), '음수·수치 결측':q.get('invalid_value_rows'), '라벨 중복':q.get('duplicate_label_rows',0),'상충 행 제외':q.get('excluded_conflicting_rows',0),'경로 제외':q.get('unusable_edges',0)} for sid,q in builder.quality.items()],['출처','입력 행','중복 행','음수·수치 결측','라벨 중복','상충 행 제외','경로 제외']),
+      '중복은 자연키 기준이며 상충값은 자동 덮어쓰기하지 않습니다. 9호선의 상충 키는 전체 행을 별도 conflicts 파일로 보존하고 분석 제외하며, 다른 출처의 상충값은 가공을 중단합니다. 음수/잘못된 시각은 quality_valid=false로 표시합니다. 100% 초과 혼잡도는 그 자체로 오류가 아닙니다.',
       '시간표 기준일, 승하차 관측연도, 혼잡도 관측월이 다릅니다. 별도 유효기간 검증 없이 동시 관측처럼 결합하지 않습니다.',
       '공휴일 달력 미확보로 is_holiday는 결측이며 요일 평균에 공휴일이 섞여 있습니다.','',
       '## 역·시간대 승하차 패턴','',table(builder.context.get('top_alighting',[]),['line','station_name','weekday','time_bin','mean_passengers','median_passengers','sample_days']),
       '위 값은 요일별 시간대의 개찰구 하차 수요입니다. 이 순위를 열차 내 하차율 또는 좌석 확률로 해석할 수 없습니다.','',
+      '## 수도권 월간 시간대 승하차 보완','',
+      '관측월: '+', '.join(builder.context.get('monthly_periods',[])),
+      table(builder.context.get('monthly_scope',[]),['source_line_name','station_rows','mapped_rows']),
+      '서울특별시 서울 열린데이터광장 OA-12252, 공공누리 제1유형(출처표시). 원본 노선명과 표준 노선명은 다릅니다. 예: 경부·경인·경원·장항선은 1호선 구간이며, 분당·수인선은 수인분당선입니다.',
+      '월별 시간대 합계는 하차 수요 패턴을 보완하지만 요일별 평균·중앙값·일별 표본 수를 만들 수 없습니다. 역별 월간 하차량 내 시간대 비중은 좌석 발생률이 아닙니다.',
+      '9호선 2·3단계 일별 자료는 서울교통공사 OA-22441(공공누리 제1유형)에서 확보했습니다. KRIC의 9호선 통합 참조 코드에 연결하되, 원본 제공기관과 참조 목록 기관은 동일하다고 간주하지 않습니다.','',
       '## OD 이동 패턴','',table(builder.context.get('od_top',[]),['year','origin_name','destination_name','passengers','destination_share']),
       '비중은 원본 파일 내 해당 출발 라벨의 연간 합계를 분모로 합니다. 코드북이 없어 노선별 역에 강제 매핑하지 않았으며, 시간대별 OD로 분해하지 않았습니다.','',
       '## 구간·칸 혼잡도 패턴','',table(builder.context.get('segment_top',[]),['line','station_name','direction','day_type','time_bin','congestion_pct']),
