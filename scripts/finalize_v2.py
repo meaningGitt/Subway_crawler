@@ -1,5 +1,6 @@
 """Validate the latest immutable datasets and refresh their report with test evidence."""
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -30,5 +31,6 @@ builder=SimpleNamespace(out=snapshot,datasets=manifest['datasets'],quality=quali
 generate(builder,json.loads((snapshot/'run.json').read_text()))
 atomic_write(snapshot/'report_context.json',json.dumps(context,ensure_ascii=False,default=str))
 atomic_write(snapshot/'test_results.json',json.dumps(context['v2_tests'],ensure_ascii=False,indent=2))
+atomic_write(snapshot/'report_generation.json',json.dumps({'snapshot':snapshot.name,'data_transform_code_sha256':manifest['fingerprint']['code'],'report_module_sha256':hashlib.sha256((REPO/'subway_crawler/recommendation/report.py').read_bytes()).hexdigest(),'finalizer_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'dataset_mutations':False},indent=2))
 print('validated report',snapshot/'report.html')
 raise SystemExit(result.returncode)

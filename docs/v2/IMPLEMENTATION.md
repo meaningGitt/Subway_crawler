@@ -47,3 +47,11 @@
 7호선 인천 구간/9호선 추가 혼잡도는 이번 요청의 ‘수집 가능 여부·라이선스 우선’ 범위로 연구용 원본을 다운로드했으며 추천 데이터에 아직 합치지 않았다. research/v2의 원본·receipt와 config/coverage_research_v2.json을 함께 확인한다. 서울시 30분 OD는 이용 신청/방문/반출 확인이 필요하고 일반 API 키만으로 해결되지 않는다. 제한 자료의 허가를 우회하지 않는다.
 
 선택 실시간 어댑터는 미구현·비활성. 빠른하차 API는 제외. feedback.schema.json은 PL-RECORD 필드/조건만 정의하며 사용자 기록 수집·가중 보정 모델·매일 예측 배치는 이번에 구현하지 않았다.
+
+CSV 공유 묶음은 다음 명령으로 재생성한다. 전체 CSV·보고서와 로컬에 있는 추가 조사 원본을 포함하고 ZIP 내부 manifest에 파일별 SHA-256을 남긴다. 대용량 기본 원본/Parquet는 별도 seat-data와 전체 Actions artifact에 유지한다.
+
+```sh
+.venv/bin/python scripts/bundle_v2.py --root ../seat-data --output ../seat-data/seat_evidence_v2_csv.zip
+```
+
+보고서만 재생성할 때 데이터셋을 수정하지 않는다. finalize_v2.py는 기존 데이터 변환 코드 해시와 현재 보고서 생성 코드 해시를 report_generation.json에 구분해서 기록한다.

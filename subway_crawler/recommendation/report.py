@@ -9,6 +9,8 @@ import pandas as pd
 from ..store import atomic_write
 
 FIELDS = {
+ 'hour':('정확한 1시간 원본 구간의 시작 시각; 개방 구간 제외','KST 시'),
+ 'timetable_reference_date':('열차 질의에 사용한 canonical 시간표의 원본 기준일; 시행일 아님','YYYY-MM-DD'),
  'holiday_policy':('특정 공휴일 포함/제외 집계 정책', '정책'),
  'raw_passengers':('정제 이전 인원; 합계 0의 원본값 보존', '명'),
  'missing_reason':('분석값 결측 처리 사유; 원본 0과 미제공 분리', '사유'),
