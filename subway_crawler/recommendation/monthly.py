@@ -69,13 +69,14 @@ def build_monthly(b, path, sid):
     long['passengers'] = pd.to_numeric(long.passengers,errors='coerce')
     long['quality_valid'] &= long.passengers.notna() & long.passengers.ge(0)
     long['raw_passengers']=long.passengers
-    totals=long.groupby(keys).passengers.transform(lambda x:x.sum(min_count=48))
+    # A transfer station may have token boarding counts while all 24 alighting bins are zero.
+    totals=long.groupby(keys+['flow']).passengers.transform(lambda x:x.sum(min_count=24))
     zero=totals.eq(0)
     long['missing_reason']=pd.NA
     long.loc[zero,'missing_reason']='not_provided_zero_month_total'
     long.loc[zero,'passengers']=float('nan')
     long.loc[zero,'quality_valid']=False
-    q['zero_month_groups']=long.loc[zero,keys].drop_duplicates().to_dict('records')
+    q['zero_month_groups']=long.loc[zero,keys+['flow']].drop_duplicates().to_dict('records')
     q['zero_semantics']='원본 0은 raw_passengers와 wide 원본에 보존. 타선 합산은 공식 역별 근거 미확보로 단정하지 않음.'
     q['invalid_cells'] = int((~long.quality_valid).sum())
     q['unknown_source_lines'] = sorted(d.loc[d.mapping_status.eq('unknown_line'),'source_line_name'].unique())

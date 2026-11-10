@@ -55,6 +55,7 @@ class V2Tests(unittest.TestCase):
             b=Builder(root/'out',Mapper(root/'inventory.csv'),[source],{'m':state})
             row={'사용월':'202610','호선명':'3호선','지하철역':'충무로','작업일자':'20261103'}
             row.update({f'{h:02}시-{h+1:02}시 {flow}인원':0 for h in range(24) for flow in ['승차','하차']})
+            row['08시-09시 승차인원']=1  # nonzero boarding must not hide an all-zero alighting day
             pd.DataFrame([row]).to_csv(root/'raw.csv',index=False);b.monthly_ridership(root/'raw.csv','m')
             result=pd.read_parquet(root/'out/datasets/monthly_alighting_features.parquet')
             self.assertEqual(len(result),24);self.assertTrue(result.passengers.isna().all());self.assertTrue(result.raw_passengers.eq(0).all())
@@ -133,6 +134,16 @@ class V2DataTests(unittest.TestCase):
     def test_holiday_target_and_monthly_coverage(self):
         self.assertGreaterEqual(self.q['metro_ridership_types']['holiday_comparison']['exclude_holidays']['ratio'],.95)
         self.assertEqual(len(self.q['monthly_calibration']['periods']),6)
+    def test_zero_alighting_months_with_nonzero_boarding_are_missing(self):
+        a=pd.read_parquet(self.root/'datasets/monthly_alighting_features.parquet')
+        keys={'IC:7:756','S1:3:321','S1:6:2615','S1:6:2649','KR:K1:K222'}
+        target=a[a.station_key.isin(keys)]
+        self.assertEqual(len(target),120)
+        self.assertTrue(target.raw_passengers.eq(0).all())
+        self.assertTrue(target.passengers.isna().all())
+        self.assertTrue(target.within_station_month_alighting_share.isna().all())
+        self.assertTrue(target.missing_reason.notna().all())
+
     def test_time_local_example_values_not_injected(self):
         scenarios=pd.read_csv(self.root/'scenario_validation.csv');self.assertEqual(len(scenarios),5)
         # A real time-local query may disagree with the supplied fixed-bin expectations; preserve/report it.

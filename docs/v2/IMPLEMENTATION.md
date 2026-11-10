@@ -7,7 +7,7 @@
 - `config/seat_evidence_v2.json`: 노선별 canonical 시간표 선택, 방향·지선 연결, 기준 혼잡도, 기본 질의. 원본에 운영기관 식별이 충분하지 않아 현재 source priority는 동일하다. 명시된 우선순위 중 최신 reference_date 하나를 선택하며 source_line_code가 여러 개면 같은 기준일의 보완 파일을 함께 사용한다. 시행일은 확보하지 못했으므로 unknown이다.
 - `config/station_aliases.json`: 검토한 노선별 개명·약칭·지선 코드만 명시. 퍼지 매칭/일괄 역 접미사 제거 없음. 900x 지선 코드는 station_key와 branch_id를 함께 보존한다.
 - 시간은 HH:MM:SS. 12시간을 초과한 자정 역전만 다음 날로 이월한다. 기준일 365일 이상은 stale. 대경선 운행은 분석 제외하고 timetable_excluded와 원본에 남긴다.
-- 월간 24시간 합계 0은 원값 raw_passengers=0을 보존하고 passengers/share는 null, missing_reason을 기록한다. 다른 노선 합산이라는 원인은 공식 확인 없이 확정하지 않는다.
+- 월간 승차/하차 각각의 24시간 합계 0은 원값 raw_passengers=0을 보존하고 passengers/share는 null, missing_reason을 기록한다. 다른 노선 합산이라는 원인은 공식 확인 없이 확정하지 않는다.
 - 구간 혼잡도 0은 유지한다. no_service_flag는 방향 경계/시간표 운행창 바깥이면 true, 양수는 false, 나머지 0은 unknown이다. 기준일 불일치가 있어 실제 운휴 확정용으로 사용하지 않는다.
 - `segment_drop_features`: 같은 방향의 이전 구간 대비 감소량. 본선·지선 식별을 유지하므로 키에 branch_id/source_station_code가 추가된다. 분기 합류의 이전 구간을 유일하게 식별할 수 없으면 감소량은 null이다.
 - 33.75%는 요청의 54석/160명 가정이다. 전 차량의 실제 좌석 정원을 검증한 상수가 아니며 좌석 점유율·확률·착석 보장이 아니다. 인천교통공사 7호선 공개 기준 34%와도 구분한다.
