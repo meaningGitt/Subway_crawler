@@ -108,6 +108,18 @@ class V2Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             query_trips(empty,{'line':'7호선','day_type':'평일','from_time':'07:00','to_time':'bad'})
 
+    def test_export_does_not_resurrect_superseded_canonical_trips(self):
+        from subway_crawler.recommendation.__main__ import export_current
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);(root/'snapshots').mkdir()
+            for name,complete in [('old',True),('new',True),('failed',False)]:
+                p=root/'snapshots'/name;(p/'datasets').mkdir(parents=True)
+                pd.DataFrame([{'trip_key':name,'stop_sequence':1}]).to_parquet(p/'datasets/timetable_stops.parquet')
+                (p/'manifest.json').write_text(json.dumps({'complete':complete,'schema_version':'seat-evidence-v2','datasets':{'timetable_stops':{'keys':['trip_key','stop_sequence']}}}))
+            (root/'snapshots/index.json').write_text(json.dumps(['old','new','failed']))
+            export_current(root,'timetable_stops',root/'current.csv')
+            self.assertEqual(pd.read_csv(root/'current.csv').trip_key.tolist(),['new'])
+
     def test_feedback_schema_has_no_location_or_probability_fields(self):
         schema=json.loads((REPO/'config/feedback.schema.json').read_text());p=schema['properties']
         self.assertFalse(schema['additionalProperties'])

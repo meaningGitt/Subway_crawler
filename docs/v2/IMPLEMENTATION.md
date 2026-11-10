@@ -36,7 +36,7 @@
 
 실제 07:00≤출발≤09:00 검증은 신도림→대림 42대/시발 12대다. API 질의의 반개구간 [07:00,09:00)은 41대/시발 12대이다. 09:00 정각 열차가 차이를 만든다.
 
-`latest.json`이 가리키는 스냅샷에서 `datasets/`, `data_dictionary.csv`, `quality.json`, `coverage_matrix.csv`, `coverage_research_matrix.csv`, `mapping_failures.csv`, `scenario_validation.csv`, `dataset_changes.csv`, `feature_defaults.json`, `test_results.json`, `report.html`을 확인한다. natural key가 달라 v1/v2 CSV를 자동 혼합하지 않고 최신 schema_version 내에서 누적 export한다.
+`latest.json`이 가리키는 스냅샷에서 `datasets/`, `data_dictionary.csv`, `quality.json`, `coverage_matrix.csv`, `coverage_research_matrix.csv`, `mapping_failures.csv`, `scenario_validation.csv`, `dataset_changes.csv`, `feature_defaults.json`, `test_results.json`, `report.html`을 확인한다. natural key가 달라 v1/v2 CSV를 자동 혼합하지 않고 최신 schema_version 내에서 누적 export한다. canonical 시간표·경로·열차 결합표는 최신 완료 스냅샷만 내보내 구버전을 재유입하지 않는다. 미완료 스냅샷은 export에서 제외한다.
 
 ## API·권한·자동 실행
 

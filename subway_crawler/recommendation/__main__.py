@@ -116,9 +116,13 @@ def export_current(root,dataset,destination):
     import pandas as pd
     frames=[];keys=None
     index=read(root/'snapshots'/'index.json',[])
+    index=[snap for snap in index if read(root/'snapshots'/snap/'manifest.json').get('complete',True)]
     latest=read(root/'snapshots'/index[-1]/'manifest.json') if index else {}
     version=latest.get('schema_version','seat-evidence-v1')
-    for snap in read(root/'snapshots'/'index.json',[]):
+    # Canonical plans are a replacement release, not cumulative observations.
+    canonical={'timetable_stops','timetable_excluded','route_features','trip_stop_congestion','trip_seat_line_features'}
+    if dataset in canonical:index=index[-1:]
+    for snap in index:
         folder=root/'snapshots'/snap;manifest=read(folder/'manifest.json');info=manifest.get('datasets',{}).get(dataset)
         if not info or manifest.get('schema_version','seat-evidence-v1')!=version:continue
         if not info.get('keys'):raise ValueError('dataset has no validated natural key')
