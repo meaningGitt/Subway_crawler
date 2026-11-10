@@ -14,7 +14,7 @@ import pandas as pd
 from ..source import LINE_NAMES, SourceError
 from ..store import atomic_write
 
-VERSION = 'seat-evidence-v1'
+VERSION = 'seat-evidence-v2'
 
 
 def read_csv(path):
@@ -36,6 +36,7 @@ class Mapper:
         self.inventory = pd.read_csv(path, dtype=str).fillna('')
         self.inventory['station_key'] = self.inventory[['RAIL_OPR_ISTT_CD', 'LN_CD', 'STIN_CD']].agg(':'.join, axis=1)
         self.inventory['base_name'] = self.inventory.STIN_NM.map(name_key)
+        self.alias_config=json.loads((Path(__file__).resolve().parents[2]/'config/station_aliases.json').read_text())
         self.cache = {}; self.audit = []
 
     def match(self, name, line=None, operator=None, code=None):
@@ -50,10 +51,11 @@ class Mapper:
         if code is not None and pd.notna(code):
             code = str(code).removesuffix('.0').lstrip('0') or '0'
             rows = rows[rows.STIN_CD.str.lstrip('0').eq(code)]
-        rows = rows[rows.base_name.eq(name_key(name))]
+        canonical_name=self.alias_config['aliases'].get(str(line),{}).get(str(name),str(name))
+        rows = rows[rows.base_name.eq(name_key(canonical_name))]
         result = (rows.iloc[0].station_key, 'matched') if len(rows) == 1 else (None, 'ambiguous' if len(rows) > 1 else 'unmatched')
         self.audit.append(dict(source_name=name, source_line=line, source_operator=operator, source_code=code,
-                               station_key=result[0], mapping_status=result[1], candidates='|'.join(rows.station_key)))
+                               station_key=result[0], mapping_status=result[1], canonical_name=canonical_name, alias_evidence=self.alias_config['evidence_url'] if canonical_name!=str(name) else None, candidates='|'.join(rows.station_key)))
         self.cache[token] = result
         return result
 
@@ -74,6 +76,9 @@ class Builder:
         self.out = Path(out); self.out.mkdir(parents=True, exist_ok=True)
         self.mapper = mapper; self.sources = {s['id']: s for s in sources}; self.states = states
         self.datasets = {}; self.quality = {}; self.context = {}
+        from .holidays import Calendar
+        self.calendar=Calendar(self.out.parent.parent if self.out.parent.name=='snapshots' else None)
+        self.quality['holiday_calendar']=self.calendar.metadata
 
     def clean(self, d, keys, required, value=None):
         missing = {c: int(d[c].isna().sum()) for c in required}
@@ -120,6 +125,7 @@ class Builder:
             info['line_rows'] = d.line.value_counts().to_dict()
         if 'station_key' in d:
             info['station_keys'] = sorted(d.station_key.dropna().unique().tolist())
+            info['usable_station_keys']=sorted(d.loc[d.quality_valid,'station_key'].dropna().unique().tolist()) if 'quality_valid' in d else info['station_keys']
         self.datasets[name] = info
         return d
 
@@ -180,7 +186,7 @@ class Builder:
         q['excluded_conflicting_rows'] = excluded
         dates = pd.to_datetime(d.service_date, errors='coerce')
         d['weekday'] = dates.dt.dayofweek.astype('Int64')
-        d['is_holiday'] = pd.Series(pd.NA, index=d.index, dtype='boolean')
+        d['is_holiday'] = self.calendar.flags(dates)
         d['direction'] = pd.NA
         d['quality_valid'] &= dates.notna() & d.flow.isin(['승차','하차'])
         # OA-22441's fare-system codes (4126...) are not KRIC codes (926...).
@@ -189,7 +195,7 @@ class Builder:
         idcols = keys+['station_name','source_row','weekday','is_holiday','direction','station_key','mapping_status','quality_valid']
         wide = d[idcols+bins].copy()
         self.save(prefix+'ridership_daily_wide',wide,sid,'역·영업일·승하차 구분·원본 시간대 열','집계 통계',['alighting','route'],
-                  '개찰구 태그 통계. 방향·칸·열차·환승 하차는 구분 불가. 공휴일 미분류.',keys,csv=False)
+                  '개찰구 태그 통계. 방향·칸·열차·환승 하차는 구분 불가. 공식 공휴일 달력 플래그 포함.',keys,csv=False)
         # Long form by month keeps memory bounded. Cross-month median uses all daily observations.
         parts=[]
         for _, block in d.groupby(d.service_date.str[:7]):
@@ -201,19 +207,8 @@ class Builder:
         q['invalid_cells']=int((~long.quality_valid).sum());self.quality[sid]=q
         self.save(prefix+'ridership_hourly',long,sid,'역·영업일·원본 시간대·승하차 구분','집계 통계',['alighting','route'],
                   '원본 시간구간을 보존. 방향 없음; 결측은 0 아님.',keys+['time_bin'],csv=False)
-        valid=long[long.quality_valid & long.mapping_status.eq('matched')]
-        group=['station_key','station_name','line','weekday','time_bin','flow']
-        agg=valid.groupby(group,dropna=False).agg(mean_passengers=('passengers','mean'),median_passengers=('passengers','median'),
-                p90_passengers=('passengers',lambda s:s.quantile(.9)),sample_days=('service_date','nunique'),
-                observation_start=('service_date','min'),observation_end=('service_date','max')).reset_index()
-        agg['direction']=pd.NA;agg['is_holiday']=pd.NA;agg['sample_check']=agg.sample_days.map(lambda n:'under_8_days' if n<8 else 'at_least_8_days_not_validation')
-        self.save(prefix+'station_weekday_patterns',agg,sid,'역·요일(월0)·시간대·승하차 구분','집계 통계',['alighting','route'],
-                  '8일 미만은 운영상 검토 기준이며 정확도 보장이 아님. 공휴일은 일반 요일 안에 섞임.',group+['observation_start','observation_end'])
-        self.save(prefix+'alighting_features',agg[agg.flow.eq('하차')],sid,'역·요일·시간대','집계 통계',['alighting'],
-                  '하차 수요 사전값 후보. 열차 하차량·빈 좌석·좌석 확률이 아님. 방향 미상.',group+['observation_start','observation_end'])
-        if not line9:
-            self.context['hourly']=valid.groupby(['time_bin','flow']).passengers.mean().unstack().reindex(bins).reset_index().to_dict('records')
-            self.context['top_alighting']=agg[agg.flow.eq('하차')].sort_values('mean_passengers',ascending=False).head(15).to_dict('records')
+        from .patterns import daily_patterns
+        daily_patterns(self,long,sid,prefix)
 
     line9_ridership = ridership
 
@@ -222,17 +217,8 @@ class Builder:
         build_monthly(self, path, sid)
 
     def segment(self,path,sid):
-        d=read_csv(path).rename(columns={'구분':'day_type','요일구분':'day_type','호선':'line','역번호':'station_code','역명':'station_name','출발역':'station_name','상하구분':'direction'})
-        keys=['day_type','line','station_code','direction']; bins=[c for c in d if re.fullmatch(r'\d+시\d+분',c)]
-        if not bins or not set(keys+['station_name']).issubset(d):raise SourceError('congestion schema changed')
-        d['source_row']=d.index+2;d=self.mapper.attach(d,operator='S1')
-        cols=keys+['station_name','station_key','mapping_status','source_row']
-        d=d[cols+bins].melt(id_vars=cols,value_vars=bins,var_name='time_bin',value_name='congestion_pct')
-        d,q=self.clean(d,keys+['time_bin'],keys,'congestion_pct');self.quality[sid]=q
-        d['reference_date']=self.reference_date(sid);d['observation_n']=pd.NA
-        self.save('segment_congestion',d,sid,'역·상하 구분·요일구분·30분 공표 평균','집계 통계',['car_context','route'],
-                  '100% 초과는 오류가 아님. 원표본 수·중앙값·분위수 미제공; 칸별 수치 아님.',keys+['time_bin','reference_date'])
-        self.context['segment_top']=d[d.quality_valid].sort_values('congestion_pct',ascending=False).head(10).to_dict('records')
+        from .segment_v2 import build_segment
+        build_segment(self,path,sid)
 
     def reference_date(self,sid):
         title=self.states[sid]['metadata']['title'] or ''
@@ -280,10 +266,30 @@ class Builder:
               p90_congestion_pct=('congestion_pct',lambda s:s.quantile(.9)),mean_relative_pct=('relative_congestion_pct','mean'),
               sample_observations=('congestion_pct','size'),sample_days=('service_date','nunique'),sample_formations=('formation_id','nunique'),
               observation_start=('service_date','min'),observation_end=('service_date','max')).reset_index()
+        a['car_position']=pd.NA
+        a['car_position_reason']='provider_orientation_not_verified'
+        a['number_group']=a.car_no.astype(int).map(lambda n:'1-3' if n<=3 else '4-7' if n<=7 else '8-10')
         a['sample_check']=a.sample_days.map(lambda n:'under_8_days' if n<8 else 'at_least_8_days_not_validation')
         self.save('car_features',a,sid,'4호선 방향성 구간·요일·시간·호차','집계 통계',['car'],
                   '동시 10칸 관측만 집계. 상대 혼잡도는 동시 편성 평균 대비 %p. 연속 측정은 독립 표본이 아님; 타 노선 전용 금지.',group+['observation_start','observation_end'])
-        self.context['car_means']=v.groupby('car_no').agg(mean=('congestion_pct','mean'),n=('congestion_pct','size')).reset_index().to_dict('records')
+        summary=a.groupby('car_no').agg(mean=('mean_congestion_pct','mean'),n=('sample_observations','sum'),feature_cells=('mean_congestion_pct','size')).reset_index()
+        summary['weighting']='equal_valid_feature_cells; simultaneous_10_cars_only'
+        self.save('car_summary',summary,sid,'호차별 동일 가중 feature cell 평균','집계 통계',['car'],
+                  '차트와 동일 CSV. car_features.mean_congestion_pct를 호차별 산술평균. 시간·구간·요일 셀 동일 가중, 측정 수 가중과 구별.', ['car_no'])
+        self.context['car_means']=summary.to_dict('records')
+        weekday=a[a.weekday.le(4)].groupby(['weekday','car_no']).mean_congestion_pct.mean().unstack()
+        pairs=[]
+        for day in weekday.index:
+            for other in weekday.index:
+                if day<other:
+                    ranks=weekday.loc[[day,other]].T.dropna().rank()
+                    if len(ranks)>1:pairs.append(float(ranks.iloc[:,0].corr(ranks.iloc[:,1])))
+        self.quality[sid].update(rank_stability={'metric':'Spearman across weekday car rankings; equal feature-cell weighting','weekday_pairs':len(pairs),'median':float(pd.Series(pairs).median()) if pairs else None},
+            raw_hours=sorted(d.observed_time.str[:2].dropna().unique()),raw_station_labels=sorted(d.station_name.unique()),
+            unmapped_labels=sorted(d.loc[d.mapping_status.ne('matched'),'station_name'].unique()),feature_station_count=a.station_key.nunique(),
+            car_orientation={'verified':False,'car_position':'unknown'},
+            scope_gaps={'05_hour':'원본 미제공' if not d.observed_time.str.startswith('05:').any() else '확보','23_hour':'원본 미제공' if not d.observed_time.str.startswith('23:').any() else '확보',
+                        'south_of_namtaeryeong':'확보 범위 확인 필요' if (d.station_key.str.startswith('KR:4:',na=False).any() or d.next_station_key.str.startswith('KR:4:',na=False).any()) else '원본 미제공: 확보 원본의 현재역/다음역 라벨 목록 확인','namtaeryeong_directions':d.loc[d.station_name.eq('남태령'),'next_station_name'].value_counts().to_dict()})
 
     def od(self,path,sid):
         d=read_csv(path).rename(columns={'출발':'origin_name','도착역':'destination_name','인원':'passengers','단위':'unit','연도':'year'})
@@ -358,28 +364,8 @@ class Builder:
         d['train_no']=d.train_no.astype(str)
         d['trip_key']=d[trip].fillna('').astype(str).agg('|'.join,axis=1)
         d,q=self.clean(d,['trip_key','stop_sequence'],needed);self.quality[sid]=q
-        d=self.mapper.attach(d,code='absent_code')
-        d['direction']=d.origin_name+' → '+d.destination_name
-        self.save('timetable_stops',d,sid,'공표 운행·요일구분·정차순서','공표 계획',['route'],
-                  '정차순서는 원본 행 순서. 기준일≠시행일. 운영기관 원본 열 없음; 직통 구간 운영기관 추정 금지.', ['trip_key','stop_sequence'])
-        edges=[]
-        for key,g in d.groupby('trip_key',sort=False):
-            records=g.to_dict('records')
-            for a,b in zip(records,records[1:]):
-                dep=clock_seconds(a['departure_time']);arr=clock_seconds(b['arrival_time'])
-                duration=None
-                if dep is not None and arr is not None:
-                    diff=arr-dep
-                    if diff < -12*3600:diff+=86400
-                    if 0<=diff<=7200:duration=diff
-                edges.append({k:a[k] for k in ['trip_key','train_no','line','source_line_code','day_type','service_type','origin_name','destination_name','direction','reference_date','effective_date','stop_sequence','station_key','station_name','departure_time']}|
-                   {'next_station_key':b['station_key'],'next_station_name':b['station_name'],'arrival_time':b['arrival_time'],
-                    'travel_seconds':duration,'quality_valid':duration is not None and pd.notna(a['station_key']) and pd.notna(b['station_key']),
-                    'source_row':a['source_row'],'next_source_row':b['source_row']})
-        e=pd.DataFrame(edges)
-        self.save('route_features',e,sid,'공표 운행의 연속 정차역 간 연결','공표 계획에서 계산',['route'],
-                  '시간차 0~7200초만 채택, 큰 자정 역전만 익일 처리. 환승 보행시간 없음. 시발·종착은 빈 좌석/동일 차량 회차의 증거 아님.', ['trip_key','stop_sequence'])
-        self.quality[sid]['unusable_edges']=int((~e.quality_valid).sum())
+        from .timetable_v2 import canonical_timetable
+        canonical_timetable(self,d,sid)
 
 
 def clock_seconds(value):
