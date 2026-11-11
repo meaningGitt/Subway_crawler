@@ -160,5 +160,15 @@ class V2DataTests(unittest.TestCase):
         scenarios=pd.read_csv(self.root/'scenario_validation.csv');self.assertEqual(len(scenarios),5)
         # A real time-local query may disagree with the supplied fixed-bin expectations; preserve/report it.
         self.assertTrue(scenarios.actual_departure.notna().all())
+        # Independently reproduce the supplied fixed-bin approximation on the same real paths.
+        p=self.root/'datasets';t=pd.read_parquet(p/'trip_stop_congestion.parquet');f=pd.read_parquet(p/'trip_seat_line_features.parquet');s=pd.read_parquet(p/'segment_congestion.parquet')
+        for requested,expected in [('06:30','학동'),('07:00','강남구청'),('07:30','어린이대공원'),('08:00',None),('08:30','청담')]:
+            trip=f[f.query_id.eq('line7_cheolsan')&f.boarding_departure_time.ge(requested+':00')].sort_values('boarding_departure_time').iloc[0]
+            g=t[t.trip_key.eq(trip.trip_key)].sort_values('stop_sequence');end=g[g.station_name.eq('태릉입구')].stop_sequence.iloc[0]
+            path=g[g.stop_sequence.ge(trip.boarding_stop_sequence)&g.stop_sequence.lt(end)]
+            segment=s[s.line.eq('7호선')&s.direction.eq('상선')&s.day_type.eq('평일')&s.time_bin.eq(requested)]
+            fixed=path[['station_key','next_station_key','station_name','stop_sequence']].merge(segment[['station_key','next_station_key','congestion_pct','no_service_flag']],on=['station_key','next_station_key'],how='left',validate='many_to_one').sort_values('stop_sequence')
+            hit=fixed[fixed.congestion_pct.le(33.75)&fixed.no_service_flag.eq(False)]
+            self.assertEqual(hit.iloc[0].station_name if len(hit) else None,expected)
 
 if __name__=='__main__':unittest.main()
