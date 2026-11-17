@@ -42,6 +42,22 @@ class EvidenceTests(unittest.TestCase):
             row = list(csv.DictReader(io.StringIO(p.read_text(encoding='utf-8-sig'))))[0]
             self.assertEqual(row, {'a':"'=1+2",'b':'','c':'한글, 문장\n줄'})
 
+    def test_known_aliases_collapse_without_losing_article_identity(self):
+        pairs = [
+            ('https://community.linkareer.com/job-materials/5589996','https://community.linkareer.com/honeytips/5589996'),
+            ('https://community.linkareer.com/mentor-employed/3334829','https://community.linkareer.com/mentor-qna/3334829'),
+            ('https://penda.tistory.com/m/102','https://penda.tistory.com/102'),
+            ('https://example.org/한글','https://example.org/%ed%95%9c%ea%b8%80'),
+            ('https://www.82cook.com/entiz/read.php?bn=15&num=123','https://www.82cook.com/entiz/read.php?num=123')]
+        for a,b in pairs: self.assertEqual(canonical_url(a),canonical_url(b))
+        self.assertNotEqual(canonical_url('https://example.org/a%2Fb'),canonical_url('https://example.org/a/b'))
+
+    def test_verification_requires_provenance_and_categories_are_controlled(self):
+        row=['https://example.org/a','통학 피곤','미확인','통학','미확인','','이동 후 신체적 피로','','피로','']
+        with self.assertRaises(ValueError): structure(row,'web_expansion',{'original_page_verified':True})
+        row[6]='임의로 추가한 분류'
+        with self.assertRaises(ValueError): structure(row,'web_expansion')
+
     def test_real_seed_replay_and_duplicate_handling(self):
         with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()):
             seed = Path(d)/'seed'; seed.mkdir()
@@ -51,14 +67,22 @@ class EvidenceTests(unittest.TestCase):
             (seed/'pilot.json').write_text(json.dumps(pilot + [pilot[0]], ensure_ascii=False))
             out = Path(d)/'out'
             rows = build(seed, out)
-            self.assertEqual(len(rows), 53)
-            self.assertEqual(len({r['source_id'] for r in rows}), 53)
+            self.assertEqual(len(rows), 79)
+            self.assertEqual(len({r['source_id'] for r in rows}), 79)
             self.assertTrue(set(REQUIRED).issubset(rows[0]))
-            self.assertTrue(all(r['human_review_status']=='미검토' and not r['original_page_verified'] for r in rows))
+            self.assertTrue(all(r['human_review_status']=='미검토' for r in rows))
+            self.assertEqual(sum(r['original_page_verified'] for r in rows),1)
+            self.assertTrue(all(r['verification_method'] for r in rows if r['original_page_verified']))
+            comments=[r for r in rows if r['source_url'].endswith('/3114992')]
+            self.assertEqual(comments[0]['evidence_class'],'자기 경험 댓글·답변')
             self.assertTrue(all(len(r['evidence_excerpt'].split()) <= 25 for r in rows))
             summary = json.loads((out/'run_summary.json').read_text())
             self.assertFalse(summary['main_collection_complete'])
             self.assertEqual(summary['validated_original_cases'], 0)
+            self.assertEqual(summary['new_web_cases'],26)
+            audit=list(csv.DictReader(io.StringIO((out/'search_classification_audit.csv').read_text(encoding='utf-8-sig'))))
+            self.assertTrue(any(r['classification']=='창작·소설' and r['disposition']=='제외·보류' for r in audit))
+            self.assertEqual(sum(r['disposition']=='채택' for r in audit),79)
             self.assertEqual(len(list(csv.DictReader(io.StringIO((out/'manual_review_sample.csv').read_text(encoding='utf-8-sig'))))),30)
             self.assertEqual(len(list(csv.DictReader(io.StringIO((out/'duplicate_log.csv').read_text(encoding='utf-8-sig'))))),1)
 
