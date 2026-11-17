@@ -1,9 +1,6 @@
 name: Metropolitan subway collection
 on:
-  schedule:
-    # KST = UTC+9. UTC 00:00/13:00 => Asia/Seoul 09:00/22:00 every day.
-    - cron: '0 0 * * *'
-    - cron: '0 13 * * *'
+  # Retired 2026-11-17 at user's request. Workflow also disabled through GitHub API.
   workflow_dispatch:
     inputs:
       retry_run:

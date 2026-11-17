@@ -1,0 +1,4 @@
+data/live/
+outputs/
+*.lock
+*.zip

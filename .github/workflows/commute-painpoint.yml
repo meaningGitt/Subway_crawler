@@ -1,0 +1,41 @@
+name: Commute pain-point CSV analysis
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'commute-painpoint-research/**'
+      - '.github/workflows/commute-painpoint.yml'
+permissions:
+  contents: read
+concurrency:
+  group: commute-painpoint-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Seoul
+      PYTHONUNBUFFERED: '1'
+    defaults:
+      run:
+        working-directory: commute-painpoint-research
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate evidence handling and collector safety
+        run: python -m unittest discover -s tests -v
+      - name: Replay existing excerpts into CSV (no new web collection)
+        run: python src/analyze.py --phase all --out outputs/current
+      - name: Upload CSV and companion reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: commute-painpoint-csv-${{ github.run_id }}
+          path: commute-painpoint-research/outputs/current/
+          retention-days: 30
+          if-no-files-found: error
+      - name: Describe actual execution scope
+        run: |
+          echo '기존 검색 발췌 재분석. 새 웹 수집 아님. 200건 본 수집 미완료·원문 대조 및 사람 검토 미완료. 실제 수량은 run_summary.csv 참조.' >> "$GITHUB_STEP_SUMMARY"
