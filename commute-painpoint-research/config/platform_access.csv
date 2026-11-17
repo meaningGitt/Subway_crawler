@@ -1,0 +1,16 @@
+﻿platform,public_access,robots_url,terms_url,restriction,actual_method,status,next_action,checked_date,rights_note
+에브리타임,회원·학교 인증 콘텐츠 제한,https://everytime.kr/robots.txt,,robots 확인 실패; 이용약관 자동수집 허용 미확인,직접 수집 없음; 검색 URL 탐색,미확보,학교 인증 또는 운영자 허가 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+블라인드,일부 공개 페이지,https://www.teamblind.com/robots.txt,https://us.teamblind.com/setting/term_and_privacy,GPTBot 차단; 약관에 무단 자동 수집 제한,검색 URL 탐색만; 발췌 데이터 미채택,미확보,자동수집 허가 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+네이버 카페·블로그,공개/회원 전용 혼재,https://cafe.naver.com/robots.txt,https://policy.naver.com/policy/disclaimer.html,robots 조회 실패; 자동 접근 일반 제한 및 예외 조건 확인,직접 수집 없음; 검색 URL 탐색,미확보,공개 범위·허용 조건 확인 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+디시인사이드,일부 공개 페이지,https://gall.dcinside.com/robots.txt,,GPTBot 등 차단; 자동 수집 권한 미확인,직접 수집 없음; 검색 URL 탐색,미확보,운영자 허가 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+Reddit,일부 공개 페이지,https://www.reddit.com/robots.txt,https://redditinc.com/policies/user-agreement,JSON/API/검색 경로 제한; 승인 없는 스크래핑 제한,직접 수집 없음; 검색 결과 중 적합 사례 미채택,미확보,승인된 API 또는 운영자 계약 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+Google Play,공개 앱 페이지,https://play.google.com/robots.txt,https://developers.google.com/android-publisher/reply-to-reviews,개발자 리뷰 API는 앱 접근 권한 필요; 임의 앱 리뷰 수집 허가 미확인,관련 앱 탐색; 실제 통근 경험 발췌 미확보,미확보,앱 소유자 권한 또는 허용된 리뷰 자료 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+Apple App Store,공개 앱 페이지,https://apps.apple.com/robots.txt,https://developer.apple.com/documentation/appstoreconnectapi/customer-reviews,API·검색 경로 제한; 개발자 API 앱 권한 필요,검색 공개 리뷰 확인; 통근 맥락 부족해 미채택,미확보,앱 권한 또는 적합한 공개 경험 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+링커리어,검색에 공개 글·댓글 노출,https://community.linkareer.com/robots.txt,https://linkareer.com/terms,robots 조회 실패; 직접 자동수집 허용 미확인,검색 서비스의 최소 발췌 반입,일부 수집,원문 대조·사람 검토 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+더쿠,검색에 공개 글 노출,https://theqoo.net/robots.txt,https://theqoo.net/?mid=service,robots 조회 실패; 제3자 자동수집 권한 확인되지 않음,검색 서비스의 최소 발췌 반입,일부 수집,원문 대조·사람 검토 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+아하,검색에 공개 Q&A 노출,https://www.a-ha.io/robots.txt,https://www.a-ha.io/policies/terms,robots 조회 실패; 약관에 검색엔진 외 크롤링 제한,직접 수집 안 함; 검색 서비스의 최소 발췌 반입,일부 수집,원문 대조·사람 검토 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+오르비,검색에 공개 글·댓글 노출,https://orbi.kr/robots.txt,,robots 조회 실패; 약관 자동수집 허용 미확인,검색 서비스의 최소 발췌 반입,일부 수집,원문 대조·사람 검토 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+티스토리·브런치,개별 블로그·소개 페이지 검색 노출,,,개별 사이트 robots·라이선스 미확인; 직접 자동수집 미실시,검색 서비스의 최소 발췌 반입,일부 수집,발췌 수준을 넘어선 이용은 별도 조건 확인,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+리멤버·잡플래닛,검색 공개 발췌,,,직접 자동수집 약관 허용 미확인,검색 서비스의 최소 발췌 반입,일부 수집,로그인 자료 우회 금지; 원문 대조 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+언론·대학·연구 공개자료,검색 인용·PDF 발췌 노출,,,사이트별 재배포 허가 미확보; 전체 원문 저장 안 함,검색 서비스의 최소 발췌 반입,일부 수집,자기경험과 매체 인용을 구분; 동일 사건 중복 주의,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
+Brave Search API,공식 API 인증 필요,,https://api-dashboard.search.brave.com/terms-of-service,일반 약관은 저장 제한; 저장 권한을 명시한 별도 플랜/계약 필요,코드 구현·HTTP 모의 테스트만; 실호출 없음,추가 권한 필요,API 키와 실제 저장 허용 계약 필요,2026-11-17,검색 노출은 원문 수집·재배포 허가를 뜻하지 않음
