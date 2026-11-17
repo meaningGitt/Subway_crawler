@@ -6,14 +6,24 @@ import os
 import re
 import tempfile
 from pathlib import Path
-from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode, quote
 
 def canonical_url(url):
     p = urlsplit(url)
     if p.scheme != 'https' or not p.hostname or p.username or p.password:
         raise ValueError('public HTTPS source URL required')
     query = sorted((k, v) for k, v in parse_qsl(p.query) if k in {'id', 'no', 'CNTN_CD', 'qstnNo', 'seq', 'articleNo', 'mode', 'section', 'bn', 'num', 'bo_table', 'wr_id', 'b'})
-    path = p.path.rstrip('/')
+    path = quote(p.path, safe="/%:@!$&'()*+,;=-._~").rstrip('/')
+    path = re.sub(r'%[0-9a-fA-F]{2}', lambda m: m.group().upper(), path)
+    # The same Linkareer article appears under several category routes.
+    # Keep the established honeytips URL, so existing evidence IDs remain stable.
+    if p.hostname == 'community.linkareer.com':
+        path = re.sub(r'^/job-materials/(\d+)$', r'/honeytips/\1', path)
+        path = re.sub(r'^/mentor-employed/(\d+)$', r'/mentor-qna/\1', path)
+    if p.hostname.endswith('.tistory.com'):
+        path = re.sub(r'^/m/(?=\d+$|entry/)', '/', path)
+    if p.hostname == 'www.82cook.com' and path == '/entiz/read.php':
+        query = [(k,v) for k,v in query if k == 'num']
     if p.hostname == 'orbi.kr':
         m = re.match(r'/\d+', path)
         if m: path = m.group()

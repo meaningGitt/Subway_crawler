@@ -26,17 +26,26 @@ DEFINITIONS = {
  'pain_category':'다중 분류 JSON 배열; 단일 사용자 총수로 합산 금지', 'severity_signal':'발췌 안의 강한 표현; 객관적 심각성 점수 아님',
  'relevance_score':'3=통학/통근 맥락과 구체 불편/행동, 2=적응 반례. 목적 관련성 서열이며 확률 아님',
  'confidence':'원문 검증 여부를 나타내는 서술형 상태; 수치 확률 아님', 'evidence_kind':'공개 글·댓글·매체 인용·문서 인용 구분',
- 'collection_method':'실제 반입 경로; 현재 Codex 검색 결과 발췌', 'original_page_verified':'직접 원문 대조 여부; 현재 false',
+ 'collection_method':'실제 반입 경로; 현재 Codex 검색 결과 발췌', 'original_page_verified':'본문 대조 여부; true여도 발언 진위 검증이나 사람 검토 완료를 뜻하지 않음',
  'evidence_status':'원문 대조 전 잠정 사례 상태', 'action_outcome':'발췌에 명시된 행동 후 결과만 기록',
  'recurrence_signal':'매일·주기·기간 등 반복성을 나타내는 원문 표현; 관측 횟수 아님',
  'source_locator':'본문/댓글 발췌 위치 확인 방법; 작성자 정보 미저장', 'scope':'장거리 확인 여부 또는 반례 여부',
- 'phase':'pilot 또는 expansion; 분석 실행 단계와 구분', 'fact_or_inference':'요약·코딩 및 독립 진위 미검증 고지',
+ 'phase':'pilot / expansion / web_expansion; 분석 실행 단계와 구분', 'fact_or_inference':'요약·코딩 및 독립 진위 미검증 고지',
+ 'evidence_class':'자기 경험 본문·댓글 / 매체 인용 / 긍정 반례; 진위 인증 아님',
+ 'search_engine':'검색 제공 도구만 확인; Google·Naver 등 엔진을 추정하지 않음',
+ 'verification_method':'원문 대조 방법; 발언 자체의 진위 검증과 다름',
+ 'verification_locator':'대조한 본문 위치; 작성자 식별정보 없음',
+ 'verification_date':'원문 대조일; 수집일·게시일과 별도',
  'llm_inference':'추론이 추가되면 별도 기록; 현재 전부 빈칸', 'extraction_method':'세션 코딩/재생 방식; 외부 모델 호출 미실행',
  'context_limit':'검색 발췌의 맥락 제한과 생략 표기', 'human_review_status':'사람 검토 완료 여부; 현재 미검토',
  'excerpt_sha256':'공백 정규화한 발췌의 SHA-256', 'causal_limit':'수면·업무·수업과 이동의 인과를 분리할 수 없는 한계'
 }
 PLATFORMS = {'community.linkareer.com':'링커리어','theqoo.net':'더쿠','orbi.kr':'오르비','www.a-ha.io':'아하',
- 'community.rememberapp.co.kr':'리멤버','www.jobplanet.co.kr':'잡플래닛','brunch.co.kr':'브런치'}
+ 'community.rememberapp.co.kr':'리멤버','www.jobplanet.co.kr':'잡플래닛','brunch.co.kr':'브런치','www.82cook.com':'82cook'}
+CATEGORIES = {'경로 선택의 어려움','계단 및 수직 이동','교통정보의 부족 또는 부정확성',
+ '이동 피로를 줄이기 위한 추가 비용','이동 후 신체적 피로','이동 후 일상생활에 미치는 영향',
+ '이동시간 및 지연','일정 조정','적응·긍정 반례','정신적 피로','주거 선택 부담',
+ '차량 내부 혼잡','환승 도보거리','환승 횟수','장시간 입석','기타(이동 중 지루함)','기타(이동 중 활동 제약)'}
 COMMENT_SOURCES = {'00079986088','00076557647','00079699955','4790046','00067589738','2921839','4369020','4844759','4dedfe9176772926afcc5cd903854b4d','4167940'}
 SECONDARY_HOSTS = {'view.asiae.co.kr','imnews.imbc.com','amp.seoul.co.kr','www.univ20.com','m.kpinews.kr','www.kinternet.org',
  'www.mt.co.kr','press.cbnu.ac.kr','www.khan.co.kr','www.segye.com','www.news1.kr','www.yna.co.kr'}
@@ -44,7 +53,7 @@ SECONDARY_HOSTS = {'view.asiae.co.kr','imnews.imbc.com','amp.seoul.co.kr','www.u
 def normalize_excerpt(s):
     return re.sub(r'\s+', ' ', s).strip()
 
-def structure(row, phase):
+def structure(row, phase, review=None):
     from urllib.parse import urlsplit
     url, excerpt, user, commute, mode, duration, categories, action, pain, published = row
     url=canonical_url(url); excerpt=normalize_excerpt(excerpt)
@@ -53,10 +62,11 @@ def structure(row, phase):
     host=urlsplit(url).hostname; platform=PLATFORMS.get(host,'티스토리' if host.endswith('.tistory.com') else '공개 매체·대학 자료')
     # A source hash is a post identifier, never a person identifier.
     sid=digest(url)[:16]; categories=categories.split('|'); counter='적응·긍정 반례' in categories
+    if set(categories) - CATEGORIES: raise ValueError('unknown category: '+url)
     kind='media_or_research_account' if host in SECONDARY_HOSTS else ('public_comment' if any(x in url for x in COMMENT_SOURCES) else 'public_post')
     if url.endswith('.pdf'): kind='published_document_account'
     status='미확인'
-    if action: status='고려·계획' if any(x in action for x in ['고려','결정']) else '실행 보고'
+    if action: status='고려·계획' if any(x in action for x in ['고려','결정','계획','고민','검토']) else '실행 보고'
     sacrifice=None
     if '5천원 더' in excerpt: sacrifice='하루 5천원 추가 지출'
     elif '30분 일찍' in excerpt: sacrifice='평소보다 30분 일찍 출발'
@@ -71,7 +81,7 @@ def structure(row, phase):
     if '버스가 늘 만석이라' in excerpt: cause='버스 만석'
     if '급행이 두 대가 먼저 가는 바람' in excerpt: cause='급행 우선 운행으로 일반열차 이용 지연(발언자 설명)'
     original_context = '원문 페이지 미열람; 검색 서비스가 반환한 공개 발췌와 게시 맥락만 확인. […]는 비연속 발췌 연결, …는 발췌 끝 생략일 수 있음'
-    return dict(record_id='CP-'+sid,source_id=sid,source_platform=platform,source_url=url,
+    record = dict(record_id='CP-'+sid,source_id=sid,source_platform=platform,source_url=url,
       published_date=published or None,collected_date='2026-11-17',user_type=user,commute_type=commute,transport_mode=mode,
       commute_duration=duration or None,situation=pain,pain_point=pain,pain_cause=cause,
       workaround=action or None,workaround_status=status,sacrifice=sacrifice,unmet_need=None,evidence_excerpt=excerpt,pain_category=categories,
@@ -85,14 +95,31 @@ def structure(row, phase):
       fact_or_inference='명시 발언의 요약·코딩; 사실성 독립 검증 아님',llm_inference=None,
       extraction_method='Codex session evidence coding; deterministic CSV replay; model version not exposed',
       context_limit=original_context,human_review_status='미검토',excerpt_sha256=digest(excerpt),
-      causal_limit='업무·수업·수면 등 다른 피로 원인과 이동의 인과효과 분리 불가')
+      causal_limit='업무·수업·수면 등 다른 피로 원인과 이동의 인과효과 분리 불가',
+      evidence_class=None,search_engine='미특정(Codex web search)',
+      verification_method=None,verification_locator=None,verification_date=None)
+    for key in ['evidence_kind','sacrifice','pain_cause','action_outcome','verification_method','verification_locator','verification_date']:
+        if review and key in review: record[key] = review[key]
+    if review and review.get('original_page_verified') is True:
+        if not all(record[k] for k in ['verification_method','verification_locator','verification_date']):
+            raise ValueError('verification provenance required: '+url)
+        record.update(original_page_verified=True,confidence='본문과 발췌 대조 완료·발언 진위 미검증',
+            evidence_status='본문 대조된 자기 보고; 사람 검토·진위 검증 미완료',
+            context_limit='검색 발췌를 web open 본문과 대조. 원문 전체 미저장. […]는 비연속 발췌 연결')
+    kind=record['evidence_kind']
+    record['source_locator']='댓글·답변; 발췌문으로 원문 내 검색' if kind=='public_comment' else '본문 발췌'
+    record['evidence_class']='적응·긍정 반례' if counter else {'public_post':'자기 경험 본문','public_comment':'자기 경험 댓글·답변'}.get(kind,'매체·문서 인용 경험')
+    return record
 
 def build(seed, out, phase='all'):
     seed=Path(seed);out=Path(out);out.mkdir(parents=True,exist_ok=True)
     rows=[];seen=set();quotes=set();duplicates=[]
-    for name in ['pilot'] + (['expansion'] if phase=='all' else []):
+    review_path=seed/'source_reviews.json'
+    reviews={canonical_url(r['source_url']):r for r in json.loads(review_path.read_text())} if review_path.exists() else {}
+    for name in ['pilot'] + (['expansion','web_expansion'] if phase=='all' else []):
+        if not (seed/f'{name}.json').exists(): continue
         for item in json.loads((seed/f'{name}.json').read_text()):
-            r=structure(item,name)
+            r=structure(item,name,reviews.get(canonical_url(item[0])))
             if r['source_id'] in seen or r['excerpt_sha256'] in quotes:
                 duplicates.append({'source_url':r['source_url'],'reason':'same_source_or_excerpt'});continue
             seen.add(r['source_id']);quotes.add(r['excerpt_sha256']);rows.append(r)
@@ -101,7 +128,10 @@ def build(seed, out, phase='all'):
     raw=[{k:r[k] for k in raw_keys} for r in rows]
     write_csv(out/'raw_data.csv',raw);write_json(out/'raw_data.json',raw)
     write_csv(out/'processed_data.csv',rows);write_json(out/'processed_data.json',rows)
+    write_csv(out/'new_web_cases.csv',[r for r in rows if r['phase']=='web_expansion'],list(rows[0]))
     discovery=json.loads((seed/'discovery.json').read_text());candidates={}
+    if phase=='all' and (seed/'discovery_web.json').exists():
+        discovery += json.loads((seed/'discovery_web.json').read_text())
     for d in discovery:
         try:url=canonical_url(d['source_url'])
         except ValueError:continue
@@ -110,6 +140,17 @@ def build(seed, out, phase='all'):
              'review_status':'발췌 분석 포함' if url in {r['source_url'] for r in rows} else '미채택·원문 검증 필요',
              'collected_date':'2026-11-17','source_body_stored':False}
     write_csv(out/'discovery_candidates.csv',list(candidates.values()))
+    selected={r['source_url']:r for r in rows}; audit=[]
+    for url in dict.fromkeys([*candidates,*reviews,*selected]):
+        r=selected.get(url); review=reviews.get(url,{})
+        audit.append(dict(source_url=url,disposition='채택' if r else ('제외·보류' if review else '미검토'),
+          classification=r['evidence_class'] if r else review.get('classification','미분류·검토 필요'),
+          reason=review.get('reason','구체 경험 발췌 확인' if r else 'URL 후보만 발견; 경험 수에 포함하지 않음'),
+          record_id=r['record_id'] if r else None,original_page_verified=r['original_page_verified'] if r else False,
+          search_engine='미특정(Codex web search)',human_review_status='미검토'))
+    write_csv(out/'search_classification_audit.csv',audit)
+    write_csv(out/'classification_distribution.csv',[{'classification':k,'candidate_count':n}
+        for k,n in Counter(r['classification'] for r in audit).most_common()])
     write_csv(out/'duplicate_log.csv',duplicates,['source_url','reason'])
     near=[]
     for i,r in enumerate(rows):
@@ -138,7 +179,7 @@ def build(seed, out, phase='all'):
     quality=[{'check':'고유 출처 수','value':len(seen),'result':'출처 URL 기준; 고유 사용자 수 아님'},
       {'check':'분석 단위 수','value':len(rows),'result':'현재 출처당 1개 단위'},
       {'check':'최소 200개 유효 경험','value':len(rows),'result':'미달; 본 수집 미완료' if len(rows)<200 else '수량 충족; 질 별도 확인'},
-      {'check':'원문 페이지 대조','value':0,'result':'미수행; 검색 발췌 기반'},
+      {'check':'원문 페이지 대조','value':sum(r['original_page_verified'] for r in rows),'result':'본문 대조 수; 발언 진위 검증·사람 검토와 다름'},
       {'check':'사람의 표본 검토','value':0,'result':'미수행; 30개 검토용 CSV 생성'},
       {'check':'정확 게시일 미확인','value':sum(not r['published_date'] for r in rows),'result':'null 유지; 검색 수집일로 대체 안 함'},
       {'check':'이동시간 미확인','value':sum(not r['commute_duration'] for r in rows),'result':'장거리만의 표본으로 해석 금지'},
@@ -179,15 +220,19 @@ def build(seed, out, phase='all'):
         item['unit']='서열; 확률 아님' if key=='relevance_score' else '해당 없음; 시간·금액은 원문 단위를 문자열에 보존'
         item['evidence_role']='발언 인용; 진위 미검증' if key=='evidence_excerpt' else '출처 메타데이터 또는 발췌 코딩; 직접 관측·추천 확률 아님'
     write_csv(out/'data_dictionary.csv',dictionary)
-    limitations='검색 발췌 기반 편의표본이며 원문 직접 대조·진위 검증·사람 검토는 미수행. 댓글은 발췌문으로만 위치 확인 가능. 같은 사람이 여러 글을 썼는지는 식별하지 않는다. 검색 노출 편향·오래된 글·매체 인용·장거리 여부 미확인이 섞여 있다. 업무와 이동의 피로 인과를 분리할 수 없다. 단순 건수는 전체 통근자의 발생률이 아니다.'
+    verified=sum(r['original_page_verified'] for r in rows)
+    limitations=f'검색 발췌 기반 편의표본이며 본문 대조 {verified}개, 발언 진위 독립 검증·사람 검토 0개. 대조 여부는 행별 컬럼 확인. 댓글은 발췌문으로 위치 확인 가능. 같은 사람이 여러 글을 썼는지는 식별하지 않는다. 검색 노출 편향·오래된 글·매체 인용·장거리 여부 미확인이 섞여 있다. 업무와 이동의 피로 인과를 분리할 수 없다. 단순 건수는 전체 통근자의 발생률이 아니다.'
     from datetime import datetime
     from zoneinfo import ZoneInfo
     metrics={'analysis_date':datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat(),
       'source_collection_date':'2026-11-17','phase':phase,'analysis_units':len(rows),'source_posts':len(seen),
       'source_count_note':'문서·매체 포함 출처 수; 사람 수 아님','candidate_urls':len(candidates),
       'minimum_target':200,'target':300,'main_collection_complete':False,'provisional_excerpt_cases':len(rows),
-      'validated_original_cases':0,'original_pages_verified':0,'human_reviews_completed':0,
-      'platform_counts':dict(Counter(r['source_platform'] for r in rows)),'pipeline_version':'commute-painpoint-v1',
+      'validated_original_cases':0,'original_pages_verified':verified,'human_reviews_completed':0,
+      'new_web_cases':sum(r['phase']=='web_expansion' for r in rows),
+      'excluded_or_deferred_candidates':sum(r['disposition']=='제외·보류' for r in audit),
+      'unreviewed_candidates':sum(r['disposition']=='미검토' for r in audit),
+      'platform_counts':dict(Counter(r['source_platform'] for r in rows)),'pipeline_version':'commute-painpoint-v1.1',
       'seed_sha256':{f.name:digest(f.read_text()) for f in seed.glob('*.json')}}
     write_json(out/'run_summary.json',metrics)
     write_csv(out/'run_summary.csv',[{k:v for k,v in metrics.items() if k!='seed_sha256'}])
@@ -200,7 +245,8 @@ def build(seed, out, phase='all'):
         atomic_text(out/config_csv.name, config_csv.read_text(encoding='utf-8'))
     write_csv(out/'collection_failures.csv',[
       {'stage':'live_repeated_search','status':'추가 권한 필요','reason':'검색 API 키·검색 결과 저장 허용 플랜 미설정','next_action':'BRAVE_SEARCH_API_KEY와 저장 권한 설정 또는 허용된 검색결과 반입'},
-      {'stage':'main_200','status':'일부 수집','reason':f'{len(rows)}개 발췌 사례 확보; 200개 미달','next_action':'직접 수집 허락·원문 대조·표본 검토 후 확대'},
+      {'stage':'main_200','status':'일부 수집','reason':f'{len(rows)}개 잠정 사례; 원문 대조·사람 검토 포함한 본 수집 미완료','next_action':'미검토 후보 선별·원문 대조·표본 검토 후 확대'},
+      {'stage':'original_page_open','status':'일부 수집','reason':'penda.tistory.com/102 web open Cache miss; 검색 발췌만 반입','next_action':'일시 접근 실패로 기록; 원문 대조 전 상태 유지'},
       {'stage':'embeddings','status':'미실행','reason':'한국어 임베딩 모델 미설치; 주제 코딩만 실시','next_action':'원문 대조된 표본 확대 후 모델 선택'}])
     report_names=['data_collection_report','pain_point_analysis','user_behavior_analysis','problem_opportunities']
     paragraphs={
@@ -211,7 +257,7 @@ def build(seed, out, phase='all'):
     for name in report_names:atomic_text(out/(name+'.md'),f'# {name}\n\n{paragraphs[name]}\n\n{limitations}\n')
     bars=''.join(f'<tr><td>{html.escape(r["pain_category"])}</td><td><meter min="0" max="{len(rows)}" value="{r["analysis_unit_count"]}"></meter> {r["analysis_unit_count"]}</td></tr>' for r in summary)
     evidence=''.join(f'<tr><td>{r["record_id"]}</td><td>{html.escape(r["pain_point"])}</td><td>{html.escape(r["evidence_excerpt"])}</td><td><a rel="noreferrer" href="{html.escape(r["source_url"],quote=True)}">출처</a></td></tr>' for r in rows)
-    atomic_text(out/'pain_point_dashboard.html',f'<!doctype html><html lang="ko"><meta charset="utf-8"><title>이동 피로 탐색</title><style>body{{font:16px system-ui;max-width:1100px;margin:40px auto;padding:20px}}td{{padding:12px;border-bottom:1px solid #ddd}}meter{{width:200px}}</style><h1>이동 피로 탐색: {len(rows)}개 발췌 사례</h1><p>200개 목표 미달 · 원문 직접 검증 0개 · 사람 검토 0개</p><p>{limitations}</p><table>{bars}</table><h2>근거 발췌</h2><table>{evidence}</table></html>')
+    atomic_text(out/'pain_point_dashboard.html',f'<!doctype html><html lang="ko"><meta charset="utf-8"><title>이동 피로 탐색</title><style>body{{font:16px system-ui;max-width:1100px;margin:40px auto;padding:20px}}td{{padding:12px;border-bottom:1px solid #ddd}}meter{{width:200px}}</style><h1>이동 피로 탐색: {len(rows)}개 발췌 사례</h1><p>200개 목표 미달 · 본문 대조 {verified}개 · 사람 검토 0개</p><p>{limitations}</p><table>{bars}</table><h2>근거 발췌</h2><table>{evidence}</table></html>')
     print(json.dumps(metrics,ensure_ascii=False))
     return rows
 
