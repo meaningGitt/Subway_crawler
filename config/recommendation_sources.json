@@ -151,18 +151,6 @@
       "license": "별도 확인 필요"
     },
     {
-      "id": "metro_fast_exit",
-      "name": "서울교통공사 빠른 하차정보",
-      "adapter": "review",
-      "kind": "fast_exit",
-      "priority": "P2",
-      "cadence": "확인 필요",
-      "url": "https://www.data.go.kr/data/15143840/openapi.do",
-      "status": "추가 권한 필요",
-      "reason": "API 활용승인·인증키 필요. 키 없이 실제 응답 확보하지 않음",
-      "license": "별도 확인 필요"
-    },
-    {
       "id": "car_boarding",
       "name": "칸별 승하차 분포",
       "adapter": "review",
@@ -185,6 +173,90 @@
       "status": "추가 권한 필요",
       "reason": "자료신청 및 이용조건 확인 필요. 교통존 OD와 역간 OD를 혼용하지 않음",
       "license": "별도 확인 필요"
+    },
+    {
+      "id": "seoul_monthly_202601",
+      "name": "평일 보정 검증용 서울시 월간 시간대 승하차 202601",
+      "adapter": "seoul_sheet",
+      "kind": "monthly_ridership",
+      "priority": "P0",
+      "cadence": "월간",
+      "suffix": ".csv",
+      "dataset_id": "OA-12252",
+      "url": "https://data.seoul.go.kr/dataList/OA-12252/S/1/datasetView.do",
+      "revalidate_days": 30,
+      "license": "공공누리 제1유형: 출처표시; 매 실행 검증",
+      "collection_period": "202601"
+    },
+    {
+      "id": "seoul_monthly_202602",
+      "name": "평일 보정 검증용 서울시 월간 시간대 승하차 202602",
+      "adapter": "seoul_sheet",
+      "kind": "monthly_ridership",
+      "priority": "P0",
+      "cadence": "월간",
+      "suffix": ".csv",
+      "dataset_id": "OA-12252",
+      "url": "https://data.seoul.go.kr/dataList/OA-12252/S/1/datasetView.do",
+      "revalidate_days": 30,
+      "license": "공공누리 제1유형: 출처표시; 매 실행 검증",
+      "collection_period": "202602"
+    },
+    {
+      "id": "seoul_monthly_202603",
+      "name": "평일 보정 검증용 서울시 월간 시간대 승하차 202603",
+      "adapter": "seoul_sheet",
+      "kind": "monthly_ridership",
+      "priority": "P0",
+      "cadence": "월간",
+      "suffix": ".csv",
+      "dataset_id": "OA-12252",
+      "url": "https://data.seoul.go.kr/dataList/OA-12252/S/1/datasetView.do",
+      "revalidate_days": 30,
+      "license": "공공누리 제1유형: 출처표시; 매 실행 검증",
+      "collection_period": "202603"
+    },
+    {
+      "id": "seoul_monthly_202604",
+      "name": "평일 보정 검증용 서울시 월간 시간대 승하차 202604",
+      "adapter": "seoul_sheet",
+      "kind": "monthly_ridership",
+      "priority": "P0",
+      "cadence": "월간",
+      "suffix": ".csv",
+      "dataset_id": "OA-12252",
+      "url": "https://data.seoul.go.kr/dataList/OA-12252/S/1/datasetView.do",
+      "revalidate_days": 30,
+      "license": "공공누리 제1유형: 출처표시; 매 실행 검증",
+      "collection_period": "202604"
+    },
+    {
+      "id": "seoul_monthly_202605",
+      "name": "평일 보정 검증용 서울시 월간 시간대 승하차 202605",
+      "adapter": "seoul_sheet",
+      "kind": "monthly_ridership",
+      "priority": "P0",
+      "cadence": "월간",
+      "suffix": ".csv",
+      "dataset_id": "OA-12252",
+      "url": "https://data.seoul.go.kr/dataList/OA-12252/S/1/datasetView.do",
+      "revalidate_days": 30,
+      "license": "공공누리 제1유형: 출처표시; 매 실행 검증",
+      "collection_period": "202605"
+    },
+    {
+      "id": "seoul_monthly_202606",
+      "name": "평일 보정 검증용 서울시 월간 시간대 승하차 202606",
+      "adapter": "seoul_sheet",
+      "kind": "monthly_ridership",
+      "priority": "P0",
+      "cadence": "월간",
+      "suffix": ".csv",
+      "dataset_id": "OA-12252",
+      "url": "https://data.seoul.go.kr/dataList/OA-12252/S/1/datasetView.do",
+      "revalidate_days": 30,
+      "license": "공공누리 제1유형: 출처표시; 매 실행 검증",
+      "collection_period": "202606"
     }
   ]
 }
