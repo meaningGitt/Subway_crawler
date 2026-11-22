@@ -1,0 +1,88 @@
+[
+  {
+    "id": "metro_transfer_time",
+    "name": "서울교통공사 환승역거리 소요시간",
+    "priority": "P0",
+    "adapter": "data_go",
+    "kind": "transfer_connections",
+    "url": "https://www.data.go.kr/data/15044419/fileData.do",
+    "suffix": ".csv",
+    "cadence": "수시",
+    "check_hours": 168,
+    "revalidate_days": 365
+  },
+  {
+    "id": "metro_transfer_connections",
+    "name": "서울교통공사 서울 도시철도 환승정보",
+    "priority": "P0",
+    "adapter": "data_go",
+    "kind": "transfer_connections",
+    "url": "https://www.data.go.kr/data/15098252/fileData.do",
+    "suffix": ".csv",
+    "cadence": "수시",
+    "check_hours": 168,
+    "revalidate_days": 365
+  },
+  {
+    "id": "kric_timetable_metadata",
+    "name": "기존 KRIC 시간표 원본 갱신일만 확인",
+    "priority": "P0",
+    "adapter": "kric_metadata",
+    "kind": "timetable_updates",
+    "url": "https://data.kric.go.kr/rips/M_01_01/detail.do?id=900",
+    "cadence": "비정기",
+    "check_hours": 12
+  },
+  {
+    "id": "timetable_catalog_metadata",
+    "name": "기존 시간표 표준데이터 카탈로그 갱신일",
+    "priority": "P0",
+    "adapter": "data_go_metadata",
+    "kind": "timetable_updates",
+    "url": "https://www.data.go.kr/data/15013206/standard.do",
+    "cadence": "수시",
+    "check_hours": 24
+  },
+  {
+    "id": "metro_alerts",
+    "name": "서울교통공사 지하철알림정보",
+    "priority": "P0",
+    "adapter": "alerts",
+    "kind": "timetable_updates",
+    "url": "https://www.data.go.kr/data/15144070/openapi.do",
+    "endpoint": "https://apis.data.go.kr/B553766/ntce/getNtceList",
+    "cadence": "제공기관 1분; 본 파이프라인 예약 점검 시 증분 확인",
+    "check_hours": 1,
+    "secret": "DATA_GO_KR_SERVICE_KEY"
+  },
+  {
+    "id": "other_operator_notices",
+    "name": "수도권 기타 운영기관 공식 운행·시설변경 공지",
+    "priority": "P0",
+    "adapter": "review",
+    "kind": "timetable_updates",
+    "url": "https://www.kric.go.kr/",
+    "cadence": "수시",
+    "reason": "기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음"
+  },
+  {
+    "id": "user_pain_points",
+    "name": "신규 지각·막차·환승실패 경험",
+    "priority": "P1",
+    "adapter": "reviewed_inbox",
+    "kind": "new_user_pain_points",
+    "url": "https://community.linkareer.com/",
+    "cadence": "권한·검토 완료 자료 반입 시",
+    "reason": "허용된 검색 계약과 원문 검토 필요; 미검토 검색 결과 자동 채택 안 함"
+  },
+  {
+    "id": "station_facilities",
+    "name": "출구·승강장·연결시설",
+    "priority": "P2",
+    "adapter": "deferred",
+    "kind": "station_facilities",
+    "url": "https://www.data.go.kr/data/15143840/openapi.do",
+    "cadence": "P0/P1 완료 후",
+    "reason": "우선순위 게이트: P0/P1 미완료로 수집하지 않음"
+  }
+]
