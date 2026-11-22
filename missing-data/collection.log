@@ -1,0 +1,16 @@
+20261122T121237-ab629b kric_timetable_metadata network/TLS/timeout failure after 3 attempts
+20261122T121237-ab629b metro_alerts DATA_GO_KR_SERVICE_KEY and 15144070 approval required
+20261122T121237-ab629b other_operator_notices 기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음
+20261122T121237-ab629b user_pain_points no permitted reviewed P1 inputs; search API/storage permission or review required
+20261122T121524-d38b3c kric_timetable_metadata offline: metadata refresh not attempted
+20261122T121524-d38b3c metro_alerts offline: alerts API not attempted
+20261122T121524-d38b3c other_operator_notices 기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음
+20261122T121524-a8b2f4 kric_timetable_metadata offline: metadata refresh not attempted
+20261122T121524-a8b2f4 metro_alerts offline: alerts API not attempted
+20261122T121524-a8b2f4 other_operator_notices 기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음
+20261122T121955-656163 kric_timetable_metadata network/TLS/timeout failure after 3 attempts
+20261122T121955-656163 metro_alerts DATA_GO_KR_SERVICE_KEY and 15144070 approval required
+20261122T121955-656163 other_operator_notices 기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음
+20261122T122205-13ccfc kric_timetable_metadata offline: metadata refresh not attempted
+20261122T122205-13ccfc metro_alerts offline: alerts API not attempted
+20261122T122205-13ccfc other_operator_notices 기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음

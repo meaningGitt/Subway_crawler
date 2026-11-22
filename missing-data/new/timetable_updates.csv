@@ -1,0 +1,2 @@
+﻿source_id,event_type,title,published_at,effective_start,effective_end,line,direction,source_modified,previous_source_modified,reference_date,service_status,collected_at,issues,source_url
+timetable_catalog_metadata,standard_catalog_metadata_only,전국도시철도운행정보표준데이터,,,,,,2025-11-18,,,NOT_USABLE,2026-11-22T12:20:02+09:00,"[""catalog_modified_date_not_operator_schedule_effective_date""]",https://www.data.go.kr/data/15013206/standard.do
