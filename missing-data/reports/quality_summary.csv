@@ -1,6 +1,6 @@
 ﻿dataset,records,not_usable,unique_key_duplicates,duplicate_rule,note
 last_train_supplement,0,0,0,SQLite primary key; conflicting batch IDs rejected,no confidence/probability invented; see per-record issues and source date conflicts
 transfer_connections,1169,1169,0,SQLite primary key; conflicting batch IDs rejected,no confidence/probability invented; see per-record issues and source date conflicts
-timetable_updates,4,4,0,SQLite primary key; conflicting batch IDs rejected,no confidence/probability invented; see per-record issues and source date conflicts
+timetable_updates,5,5,0,SQLite primary key; conflicting batch IDs rejected,no confidence/probability invented; see per-record issues and source date conflicts
 new_user_pain_points,3,0,0,SQLite primary key; conflicting batch IDs rejected,no confidence/probability invented; see per-record issues and source date conflicts
 station_facilities,0,0,0,SQLite primary key; conflicting batch IDs rejected,no confidence/probability invented; see per-record issues and source date conflicts

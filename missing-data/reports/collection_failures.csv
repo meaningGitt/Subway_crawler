@@ -1,2 +1,2 @@
 ﻿source_id,priority,url,cadence,checked_at,status,error_category,reason
-other_operator_notices,P0,https://www.kric.go.kr/,수시,2026-11-25T01:56:10+09:00,FAILED,user_action,기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음
+other_operator_notices,P0,https://www.kric.go.kr/,수시,2026-11-25T01:58:55+09:00,FAILED,user_action,기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음

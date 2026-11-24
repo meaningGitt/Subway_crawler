@@ -2,7 +2,7 @@
 P0,역·요일·방향 경로·종착지별 막차 후보,DERIVED,existing timetable only,시행일·현행성 미확인; data/derived 별도 저장
 P0,시간표 시행일·중간종착·야간 운행일,NOT_VERIFIED,no invented values,원본 메타데이터 갱신일로 시행일 대체 금지
 P0,환승 연결·방향·소요시간,PARTIAL,official files; see source_registry actual results,기준일 충돌·종료역 코드 의미 미확인 행은 NOT_USABLE
-P0,운행 변경·운휴·시설 변경 공지,NOT_VERIFIED,official alerts API adapter,API 승인·키 필요; 타기관 공지 자동수집 허용 미확인
+P0,운행 변경·운휴·시설 변경 공지,PARTIAL,official alerts API; actual success in source_registry,서울교통공사 공지 범위만; 현재 유효기간·열차 연결·타기관 공지는 별도 확인
 P1,신규 불편 사례,STOPPED_BY_USER,preserve existing records; honor source enabled flag,중단한 수집은 추가 입력 처리·재시도 대상에서 제외
 P2,역 구조·출구 연결 시설,DEFERRED,priority gate,P0 미완료; 중단된 P1은 완료 대기 조건에서 제외
 VERIFY,인천 승하차·혼잡도,NOT_VERIFIED,excluded from recollection,현재 확인한 스냅샷에서 해당 통계 근거 미확인; 부재를 미수집으로 단정하지 않음

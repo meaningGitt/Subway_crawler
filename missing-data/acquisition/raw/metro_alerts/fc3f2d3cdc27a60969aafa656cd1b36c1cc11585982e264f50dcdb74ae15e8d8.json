@@ -1,0 +1,40 @@
+{
+  "response" : {
+    "header" : {
+      "resultCode" : "00",
+      "resultMsg" : "NORMAL_CODE"
+    },
+    "body" : {
+      "items" : {
+        "item" : [ {
+          "noftTtl" : "2호선 성수지선 선로전환기 조치완료 및 열차운행 재개",
+          "noftCn" : "서울교통공사에서 알려드립니다.\r\n현재 2호선 성수지선 용답역 선로전환기 장애는 조치완료되어 2호선 성수지선 내,외선(양쪽 방면) 열차 정상 운행 중입니다. 11-20 08:47:08",
+          "noftOcrnDt" : "2026-11-20T08:47:08",
+          "lineNmLst" : "2호선",
+          "stnSctnCdLst" : "0244",
+          "crtrYmd" : "20261120",
+          "noftSeCd" : "6",
+          "nonstopYn" : "N",
+          "upbdnbSe" : "내선, 외선",
+          "xcseSitnBgngDt" : null,
+          "xcseSitnEndDt" : null
+        }, {
+          "noftTtl" : "2호선 성수지선 선로전환기 장애",
+          "noftCn" : "서울교통공사에서 알려드립니다.\r\n현재 2호선 성수지선 용답역 선로전환기 장애로 2호선 성수지선 양쪽방면 열차 운행 중지 및 1호선 일부 열차 운행 지연 중이오니 이용에 참고하시기 바랍니다. 11-20 06:36:11",
+          "noftOcrnDt" : "2026-11-20T06:36:11",
+          "lineNmLst" : "1호선, 2호선",
+          "stnSctnCdLst" : "0244",
+          "crtrYmd" : "20261120",
+          "noftSeCd" : "4",
+          "nonstopYn" : "N",
+          "upbdnbSe" : null,
+          "xcseSitnBgngDt" : null,
+          "xcseSitnEndDt" : null
+        } ]
+      },
+      "pageNo" : 1,
+      "numOfRows" : 100,
+      "totalCount" : 2
+    }
+  }
+}
