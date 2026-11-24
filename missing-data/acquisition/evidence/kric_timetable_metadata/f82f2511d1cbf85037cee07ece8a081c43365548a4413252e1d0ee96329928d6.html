@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<title>철도 데이터 포털 </title>
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=1300">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<link href="/rips/resources/css/base.css" rel="stylesheet">
+<link href="/rips/resources/css/style.css" rel="stylesheet">
+<link href="/rips/resources/css/iecheck.css" rel="stylesheet">
+
+<script src="/rips/resources/plugins/jquery/jquery-1.12.0.min.js"></script>
+<script src="/rips/resources/plugins/jquery/jquery-migrate-1.2.1.min.js"></script>
+<script src="/rips/resources/js/common.js"></script>
+<script src="/rips/resources/js/iecheck.js"></script>
+
+<script>
+function logout(){
+	var loginform = $("<form/>",{"method":"post","action":"/rips/logout.do","style":"display:none;"}).append($("<input name='_csrf' value='2436f74e-7bff-4564-8954-388e82b8dc93'>"));
+	$("body").append(loginform);
+	loginform.submit();
+	return false;
+};
+var contextPath = "/rips";
+$.ajaxSetup({
+	beforeSend: function(xhr, settings) {
+		if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+			xhr.setRequestHeader("X-CSRF-TOKEN", "2436f74e-7bff-4564-8954-388e82b8dc93");
+		}
+	}
+});
+</script>
+		<link href="/rips/resources/css/board.css" rel="stylesheet">
+		<script src="/rips/resources/plugins/jquery.heum.validation.js"></script>
+		<script src="/rips/resources/js/dataset/error.js"></script>
+		<script>
+			$(document).ready(function(){
+				$("div[id^=operation-] .operation-detail-button").click(function(){
+					var operationBox = $(this).parents("div[id^=operation-]");
+					var infoBox = operationBox.find(".board_area4");
+					var defaultBox = operationBox.find(".view_type");
+					var borderStyle = "";
+					if(infoBox.hasClass("Hidden")){
+						borderStyle = "none";
+						infoBox.removeClass("Hidden");
+						$(this).text("닫기");
+					}else{
+						borderStyle = "1px solid #dddddd";
+						infoBox.addClass("Hidden");
+						$(this).text("상세정보");
+					}
+					if($("div[id^=operation-]:last").is(operationBox)){
+						defaultBox.css("border-bottom",borderStyle);
+					}
+					return false;
+				});
+				$("div[id^=operation-] .operation-error-send-button").click(function(){
+					
+						
+						
+							$("#err-data-popup input[name=operation]:hidden").val($(this).data("id"));
+							$.railportal.dataset.errorSend.popup(true);
+						
+						
+					
+					return false;
+				});
+			});
+		</script>
+	
+</head>
+<body>
+	<div class="skip-navigation">  
+		<p><a href="#nav">대메뉴 바로가기</a></p>
+	    <p><a href="#sub_contents">메뉴 건너뛰기</a></p>  
+	</div>  
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- TOP메뉴 S -->
+<div id="ab_util_wrap">
+	<div id="ab_util_box">
+    	<!--
+    	<ul class="ab_util_mn">
+        	<li><a href="javascript:loginDo();">로그인</a></li>
+            <li><a href="/jsp/general/join/member/generalMemberAgreement.jsp">회원가입</a></li>
+            <li><a href="/jsp/general/guide/centerIntro.jsp?menuID=M050301">고객센터</a></li>
+            <li><a href="/jsp/general/guide/newSiteMap.jsp?menuID=M050307">사이트맵</a></li>
+        </ul>
+        -->
+        <ul class="indp_site">
+        	<li><a href="http://www.kric.go.kr/index.jsp">철도산업정보센터</a></li>
+            <li><a href="http://www.kric.go.kr/jsp/biz/main.jsp">철도Biz</a></li>
+            <li><a href="http://www.kric.go.kr/jsp/industry/countryIndex.jsp">해외철도정보</a></li>
+            <li><a href="http://www.kric.go.kr/jsp/industry/rss/operatingReportList.jsp">철도통계</a></li>
+        </ul>
+    </div>
+</div>
+<!-- TOP메뉴 E -->
+
+<header>	
+	<div class="center_area">
+		<h1><a href="/rips"><img src="/rips/resources/images/logo.png" alt="레일포털(RAIL PORTAL) 대표로고" /></a></h1>
+		<nav id="nav">
+			<ul>
+				
+					<li>
+						
+						<h2><a href="/rips/M_01_01/intro.do">개방데이터</a></h2>
+					</li>
+				
+					<li>
+						
+						<h2><a href="javascript:$.railportal.fullScreenPopup('http://station.kric.go.kr/v2/korLines/basic/index.do?gbvMreaWideCd=01','철도역 노선도');">시각화제공정보</a></h2>
+					</li>
+				
+					<li>
+						
+						<h2><a href="/rips/M_03_01/intro.do">활용사례</a></h2>
+					</li>
+				
+					<li>
+						
+						<h2><a href="/rips/M_04_01/intro.do">정보공유</a></h2>
+					</li>
+				
+			</ul>
+		</nav>
+		<ul class="top_side_menu">
+		
+		</ul>
+<!-- 		<div class="top_search"> -->
+<!-- 			<a href="#"><span class="Hidden">검색하기</span></a> -->
+			<!-- 위 top_search의 a를 누르면 top_search_input의 display를 block로 변경 -->
+<!-- 			<div class="top_search_input" style="display:none;"> -->
+<!-- 				<label for="" class="Hidden">검색어를 입력하세요.</label> -->
+<!-- 				<input type="text" value="" id="" /> -->
+<!-- 				<button type="button">검색</button> -->
+<!-- 			</div> -->
+<!-- 		</div> -->
+	</div>
+	<div id="all_menu" style="display:none;">
+		<div class="center_area">
+			<p>한국철도<br/>데이터활용</p>
+			
+				
+					<ul class="all_menu01">
+						
+							<li>
+								
+								<a href="/rips/M_01_01/intro.do">파일데이터</a>
+							</li>
+						
+							<li>
+								
+								<a href="/rips/M_01_02/intro.do">Open API</a>
+							</li>
+						
+						
+					</ul>
+				
+			
+				
+					<ul class="all_menu02">
+						
+							<li>
+								
+								<a href="javascript:$.railportal.fullScreenPopup('http://station.kric.go.kr/v2/korLines/basic/index.do?gbvMreaWideCd=01','철도역 노선도');">철도역 노선도</a>
+							</li>
+						
+							<li>
+								
+								<a href="javascript:$.railportal.fullScreenPopup('http://station.kric.go.kr/v2/altmInfoSys/index.do?areCd=01&amp;lnCd=1&amp;railOprIsttCd=KR&amp;prprStinCd=0324','철도역 운영 정보');">철도역 운영 정보</a>
+							</li>
+						
+							<li>
+								
+								<a href="javascript:$.railportal.fullScreenPopup('http://hc.kric.go.kr','철도역 편의 정보');">철도역 편의 정보</a>
+							</li>
+						
+							<li>
+								
+								<a href="javascript:$.railportal.fullScreenPopup('http://station.kric.go.kr/v2/statistics/index.do','도시/광역철도 현황');">도시/광역철도 현황</a>
+							</li>
+						
+						
+					</ul>
+				
+			
+				
+					<ul class="all_menu03">
+						
+							<li>
+								
+								<a href="/rips/M_03_01/intro.do">데이터 활용사례</a>
+							</li>
+						
+						
+					</ul>
+				
+			
+				
+					<ul class="all_menu04">
+						
+							<li>
+								
+								<a href="/rips/M_04_01/intro.do">공지사항</a>
+							</li>
+						
+							<li>
+								
+								<a href="/rips/M_04_02/intro.do">자료실</a>
+							</li>
+						
+							<li>
+								
+								<a href="/rips/M_04_04/intro.do">데이터 최신화 요청</a>
+							</li>
+						
+						
+					</ul>
+				
+			
+			<!-- 
+			 -->
+		</div>
+	</div>
+	<script>
+		$("#nav").mouseover(function() {
+			$("#all_menu").stop().show();
+		});
+		$("header").mouseleave(function(){
+			$("#all_menu").stop().hide();
+		});
+	</script>
+</header>
+<section id="sub">
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<article class="left">
+    	<h2>개방데이터</h2>
+        <ul>
+            
+				
+					
+					
+						
+						
+					
+				
+				<li class="active">
+					<a href="/rips/M_01_01/intro.do">파일데이터</a>
+					
+				</li>
+			
+				
+					
+					
+						
+						
+					
+				
+				<li class="">
+					<a href="/rips/M_01_02/intro.do">Open API</a>
+					
+				</li>
+			
+        </ul>
+    </article>
+<article class="sub_cont">
+	    	<div class="sub_cont_top">
+	    		<ul>
+						<li><a href="/rips/"><img src="/rips/resources/images/sub/icon_home.png" alt="메인으로 이동" /></a></li>
+						<li><a href="#" class="">개방데이터</a></li>
+						<li><a href="#" class="active">파일데이터</a></li>
+						</ul>
+					<h3>파일데이터</h3>
+				</div>
+	        <div id="sub_contents">
+	        	
+		<div class="table_title_view">
+			<span class="title_view_icon">열차이용정보</span>
+			<dl>
+				<dt>표준데이터 운행정보(전체 기관)</dt>
+				<dd>도시철도</dd>
+				<dd><span>제공기관 : 전국도시철도운영기관</span><span>확장자 : XLSX</span><span>다운로드 횟수 : 4944건</span></dd>
+			</dl>
+		</div>
+		
+			<div style="min-height:150px;padding:30px;border-bottom:1px solid #ddd;">
+				전체 도시광역철도 운행기관의 운행정보에 대한 표준데이터
+			</div>
+		
+		
+			<div id="operation-1">
+				<div class="view_type" style="border-bottom:1px solid #dddddd;">
+					<h6 class="xlsx">전체_도시철도운행정보_20260630</h6>
+					<p class="fr">
+						
+							
+							
+								<button type="button" class="round_btn operation-download-button" onclick="location.href='/rips/dataset/download.file?type=filedata&id=900&operation=1';">다운로드</button>
+							
+							
+						
+						<button type="button" class="round_btn operation-detail-button">상세정보</button>
+						<button type="button" class="round_btn operation-error-send-button" data-id="1">오류신고</button>
+						
+					</p>
+				</div>
+				<div class="board_area4 Hidden" style="margin-bottom:15px;">
+					<table class="list">
+						<caption class="Hidden">다운로드 기본정보</caption>
+						<tbody>
+							
+								<tr>
+									
+										<th>업데이트주기</th>
+										<td >없음</td>
+									
+									
+										<th>차기등록예정일</th>
+										<td >2032-03-30</td>
+									
+								</tr>
+							
+							<tr>
+								<th>다운로드 횟수</th>
+								<td colspan="3">4944</td>
+							</tr>
+							
+								<tr>
+									
+										<th>등록일</th>
+										<td >2021-11-01</td>
+									
+									
+										<th>수정일</th>
+										<td >2026-10-12</td>
+									
+								</tr>
+							
+							
+							
+								<tr>
+									<th>설명</th>
+									<td colspan="3">전체 도시광역철도 운행기관의 운행정보에 대한 표준데이터</td>
+								</tr>
+							
+						</tbody>
+					</table>
+				</div>
+			</div>
+		
+		
+		
+		<div class="table_function">
+			<div class="table_btn_area fr">
+				<button type="button" class="btn blue_btn" onclick="location.href='/rips/M_01_01/intro.do;jsessionid=HluLgQSvoQV-XrLwbahEF3sI';">목록</button>
+			</div>
+		</div>
+		
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<section class="popup Hidden" id="err-data-popup" style="left:217px; top:155px; width:763px; height:600px;">
+		<form id="error-send-form">
+			<input type="hidden" name="dv" value="filedata" readonly="readonly"/>
+			<input type="hidden" name="service_id" value="900" readonly="readonly"/>
+			<input type="hidden" name="service" readonly="readonly"/>
+			<input type="hidden" name="operation" readonly="readonly"/>
+			
+			<h4>데이터 오류 신고</h4>
+			<article class="popup_body">
+				<div class="board_area2">
+					<table class="list"> 
+						<caption class="Hidden">데이터 오류 신고</caption>
+						<tbody>
+							<tr>
+								<th>이메일</th>
+								<td colspan="3">
+									<input type="text" name="email" id="error-email" value="" class="w100" data-max-length="100" data-null="false" data-length-is-byte="true" data-name="이메일" data-email="true"/>
+									<span class="small">
+										<span id="error-email-length"></span>/200
+									</span>	
+								</td>
+							</tr>
+							<tr>
+								<th>전화번호</th>
+								<td>
+									<input type="text" name="tel" id="error-tel" value="" class="w100" data-max-length="20" data-null="false" data-length-is-byte="true" data-name="전화번호" data-phone="true"/>
+									<span class="small">
+										<span id="error-tel-length"></span>/20
+									</span>	
+								</td>
+								<th>핸드폰번호</th>
+								<td>
+									<input type="text" name="phone" id="error-phone" value="" class="w100" data-max-length="20" data-null="false" data-length-is-byte="true" data-name="휴대폰번호" data-phone="true"/>
+									<span class="small">
+										<span id="error-phone-length"></span>/20
+									</span>	
+								</td>
+							</tr>
+							<tr>
+								<th>제목</th>
+								<td colspan="3">
+									<input type="text" name="title" id="error-title" value="" class="w100" data-max-length="200" data-null="false" data-length-is-byte="true" data-name="제목" />
+									<span class="small">
+										<span id="error-title-length"></span>/200
+									</span>	
+								</td>
+							</tr>
+							<tr>
+								<th>내용</th>
+								<td colspan="3">
+									<textarea name="content" id="error-content" rows="13" cols="50" class="w100" data-null="false" data-max-length="4000" data-length-is-byte="true" data-name="내용" ></textarea>
+									<span class="small">
+										<span id="error-content-length"></span>/4000
+									</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<span style="float:right">
+						<button type="submit" class="btn blue_btn">저장</button>
+						<button type="button" class="btn white_btn" style="padding: 6px 12px;" onclick="javascript:$.railportal.dataset.errorSend.popup(false);">취소</button>
+					</span>
+				</div>
+			</article> 
+		</form>
+	</section>
+
+	
+	        </div>
+	    </article>
+	</section>
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<footer>
+	<div class="center_area">
+		<ul>
+			<li><a href="/rips/serviceInfo/introduce.do">레일포털 소개</a></li>
+<!--			<li><a href="/rips/serviceInfo/privacyPolicyStatement.do">개인정보처리방침</a></li>  20260810 -->
+ 			<li><a href="http://www.kric.go.kr/jsp/board/portal/sub07/privateProtect.jsp">개인정보처리방침</a></li> 
+<!--			<li><a href="/rips/serviceInfo/clause.do">포털이용약관</a></li>    20261103 -->
+			<li><a href="https://data.molit.go.kr/systemQuality/list?system_id=S0047" target="_blank">품질오류신고 및 확인</a></li>
+		</ul>
+		<p>
+		    Copyright ⓒ 2019 Railway Industry Information Center. All rights reserved.<br/>
+ 			(우:34618)대전광역시 동구 중앙로 242 국가철도공단 3층<br/>
+ 			TEL:042-621-8737<br/> 
+		</p>
+<!-- 		<div class="footer_right"> -->
+<!-- 			<select> -->
+<!--            	<option>관련사이트</option> -->
+<!--                <option>관련사이트1</option> -->
+<!--                <option>관련사이트2</option> -->
+<!--            </select><button type="button">이동</button><br /> -->
+<!-- 			<div class="social_area"> -->
+
+
+<!-- 			</div> -->
+<!-- 		</div> -->
+	</div>
+</footer></body>
+</html>

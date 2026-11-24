@@ -1168,6 +1168,9 @@ transfer_connections,metro_transfer_time,96,NOT_USABLE,"[""catalog_filename_date
 transfer_connections,metro_transfer_time,97,NOT_USABLE,"[""catalog_filename_date_conflict"",""reference_date_not_verified""]",https://www.data.go.kr/data/15044419/fileData.do,official source actually fetched
 transfer_connections,metro_transfer_time,98,NOT_USABLE,"[""catalog_filename_date_conflict"",""reference_date_not_verified""]",https://www.data.go.kr/data/15044419/fileData.do,official source actually fetched
 transfer_connections,metro_transfer_time,99,NOT_USABLE,"[""catalog_filename_date_conflict"",""reference_date_not_verified""]",https://www.data.go.kr/data/15044419/fileData.do,official source actually fetched
+timetable_updates,kric_timetable_metadata,,NOT_USABLE,"[""metadata_date_is_not_timetable_effective_date""]",https://data.kric.go.kr/rips/M_01_01/detail.do?id=900,official source actually fetched
+timetable_updates,metro_alerts,,NOT_USABLE,"[""notice_not_linked_to_trip_and_timetable_version""]",https://www.data.go.kr/data/15144070/openapi.do,official source actually fetched
+timetable_updates,metro_alerts,,NOT_USABLE,"[""notice_not_linked_to_trip_and_timetable_version""]",https://www.data.go.kr/data/15144070/openapi.do,official source actually fetched
 timetable_updates,timetable_catalog_metadata,,NOT_USABLE,"[""catalog_modified_date_not_operator_schedule_effective_date""]",https://www.data.go.kr/data/15013206/standard.do,official source actually fetched
 new_user_pain_points,user_pain_points,,RESEARCH_ONLY,[],https://community.linkareer.com/mentor-qna/2931455,SEARCH_EXCERPT_ONLY
 new_user_pain_points,user_pain_points,,RESEARCH_ONLY,[],https://community.linkareer.com/mentor-qna/3151902,VERIFIED

@@ -14,3 +14,4 @@
 20261122T122205-13ccfc kric_timetable_metadata offline: metadata refresh not attempted
 20261122T122205-13ccfc metro_alerts offline: alerts API not attempted
 20261122T122205-13ccfc other_operator_notices 기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음
+20261125T015607-6de227 other_operator_notices 기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음

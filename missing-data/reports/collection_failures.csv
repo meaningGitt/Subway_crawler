@@ -1,4 +1,2 @@
 ﻿source_id,priority,url,cadence,checked_at,status,error_category,reason
-kric_timetable_metadata,P0,https://data.kric.go.kr/rips/M_01_01/detail.do?id=900,비정기,2026-11-22T12:22:06+09:00,FAILED,retryable,offline: metadata refresh not attempted
-metro_alerts,P0,https://www.data.go.kr/data/15144070/openapi.do,제공기관 1분; 본 파이프라인 예약 점검 시 증분 확인,2026-11-22T12:22:06+09:00,FAILED,retryable,offline: alerts API not attempted
-other_operator_notices,P0,https://www.kric.go.kr/,수시,2026-11-22T12:22:06+09:00,FAILED,user_action,기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음
+other_operator_notices,P0,https://www.kric.go.kr/,수시,2026-11-25T01:56:10+09:00,FAILED,user_action,기관별 자동 수집 허용과 구조를 확인하지 못함; 서울교통공사 공지로 대체하지 않음
