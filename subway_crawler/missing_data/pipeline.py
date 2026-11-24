@@ -257,6 +257,8 @@ def run(args):
         for source in registry:
             sid=source['id'];old=state_get(db,sid);result=dict(source_id=sid,priority=source['priority'],url=source['url'],cadence=source.get('cadence'),checked_at=now())
             try:
+                if source.get('enabled') is False:
+                    result.update(status='STOPPED_BY_USER',reason=source.get('reason','collection disabled'));results.append(result);continue
                 if args.retry_failed and sid not in failed:
                     result.update(status='SKIPPED_NOT_FAILED');results.append(result);continue
                 if source['adapter']=='deferred':
@@ -368,8 +370,8 @@ def run(args):
           {'priority':'P0','item':'시간표 시행일·중간종착·야간 운행일','status':'NOT_VERIFIED','action':'no invented values','limitation':'원본 메타데이터 갱신일로 시행일 대체 금지'},
           {'priority':'P0','item':'환승 연결·방향·소요시간','status':'PARTIAL' if db.execute("SELECT 1 FROM records WHERE kind='transfer_connections'").fetchone() else 'NOT_VERIFIED','action':'official files; see source_registry actual results','limitation':'기준일 충돌·종료역 코드 의미 미확인 행은 NOT_USABLE'},
           {'priority':'P0','item':'운행 변경·운휴·시설 변경 공지','status':'NOT_VERIFIED','action':'official alerts API adapter','limitation':'API 승인·키 필요; 타기관 공지 자동수집 허용 미확인'},
-          {'priority':'P1','item':'신규 불편 사례','status':'PARTIAL' if db.execute("SELECT 1 FROM records WHERE kind='new_user_pain_points'").fetchone() else 'NOT_VERIFIED','action':'deduplicated reviewed minimal quotations','limitation':'검색 발췌와 본문 대조 구분; 무인 새 검색은 별도 저장 허용 검색 API 필요'},
-          {'priority':'P2','item':'역 구조·출구 연결 시설','status':'DEFERRED','action':'priority gate','limitation':'P0/P1 미완료'},
+          {'priority':'P1','item':'신규 불편 사례','status':'STOPPED_BY_USER' if any(s['id']=='user_pain_points' and s.get('enabled') is False for s in registry) else 'PARTIAL','action':'preserve existing records; honor source enabled flag','limitation':'중단한 수집은 추가 입력 처리·재시도 대상에서 제외'},
+          {'priority':'P2','item':'역 구조·출구 연결 시설','status':'DEFERRED','action':'priority gate','limitation':'P0 미완료; 중단된 P1은 완료 대기 조건에서 제외'},
           {'priority':'VERIFY','item':'인천 승하차·혼잡도','status':'NOT_VERIFIED','action':'excluded from recollection','limitation':'현재 확인한 스냅샷에서 해당 통계 근거 미확인; 부재를 미수집으로 단정하지 않음'}]
         csv_write(out/'reports/data_gap_analysis.csv',gaps)
         mvp=[{'capability':k,'status':st,'reason':reason} for k,st,reason in [

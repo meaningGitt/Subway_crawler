@@ -72,8 +72,9 @@
     "adapter": "reviewed_inbox",
     "kind": "new_user_pain_points",
     "url": "https://community.linkareer.com/",
-    "cadence": "권한·검토 완료 자료 반입 시",
-    "reason": "허용된 검색 계약과 원문 검토 필요; 미검토 검색 결과 자동 채택 안 함"
+    "cadence": "수집 중단",
+    "reason": "2026-11-25 사용자 요청: 신규 불편 사례 수집 중단. 기존 자료만 보존",
+    "enabled": false
   },
   {
     "id": "station_facilities",
@@ -82,7 +83,7 @@
     "adapter": "deferred",
     "kind": "station_facilities",
     "url": "https://www.data.go.kr/data/15143840/openapi.do",
-    "cadence": "P0/P1 완료 후",
-    "reason": "우선순위 게이트: P0/P1 미완료로 수집하지 않음"
+    "cadence": "P0 완료 후",
+    "reason": "P0 미완료로 보류. 사용자 요청으로 중단한 P1은 선행 조건에서 제외"
   }
 ]

@@ -3,16 +3,34 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from argparse import Namespace
 
 import pandas as pd
 
 from subway_crawler.missing_data.inventory import inspect_existing, unwrap_times, derive_last_trains, sha
-from subway_crawler.missing_data.pipeline import connect, upsert, Lock, duration, transfer_rows, url_key, alerts, deduplicate_batch, validate_record
+from subway_crawler.missing_data.pipeline import connect, upsert, Lock, duration, transfer_rows, url_key, alerts, deduplicate_batch, validate_record, run
 from subway_crawler.recommendation.sources import AcquisitionError
 from unittest.mock import patch
 
 
 class MissingDataTests(unittest.TestCase):
+    def test_stopped_source_does_not_read_new_inputs_or_remove_old_records(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);out=root/'new-state';out.mkdir()
+            db=connect(out/'collection.sqlite')
+            with db:upsert(db,'new_user_pain_points','old',{'source_id':'user_pain_points','service_status':'RESEARCH_ONLY'})
+            db.close()
+            registry=root/'sources.json';registry.write_text(json.dumps([{'id':'user_pain_points','enabled':False,
+                'adapter':'reviewed_inbox','kind':'new_user_pain_points','priority':'P1','url':'https://example.org','reason':'user stopped'}]))
+            args=Namespace(out=str(out),baseline_root=str(root/'old'),baseline=str(root/'absent.json'),prepare=False,
+                registry=str(registry),inbox=str(root/'must-not-read.csv'),retry_failed=True,offline=False,event_created_at='')
+            with patch('subway_crawler.missing_data.pipeline.read_csv') as reader:
+                self.assertEqual(run(args),0);reader.assert_not_called()
+            summary=json.loads((out/'reports/collection_summary.json').read_text())
+            self.assertEqual(summary['results'][0]['status'],'STOPPED_BY_USER')
+            self.assertEqual(summary['cumulative']['new_user_pain_points'],1)
+            self.assertEqual(summary['counts']['new'],0)
+
     def test_duplicate_conflicts_are_not_silently_overwritten(self):
         a={'source_record_id':'1','duration':20}
         self.assertEqual(deduplicate_batch([a,a]),([a],1))
