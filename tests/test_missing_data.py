@@ -8,12 +8,29 @@ from argparse import Namespace
 import pandas as pd
 
 from subway_crawler.missing_data.inventory import inspect_existing, unwrap_times, derive_last_trains, sha
-from subway_crawler.missing_data.pipeline import connect, upsert, Lock, duration, transfer_rows, url_key, alerts, deduplicate_batch, validate_record, run
+from subway_crawler.missing_data.pipeline import connect, upsert, Lock, duration, transfer_rows, url_key, alerts, deduplicate_batch, validate_record, run, ident
 from subway_crawler.recommendation.sources import AcquisitionError
 from unittest.mock import patch
 
 
 class MissingDataTests(unittest.TestCase):
+    def test_notice_raw_provenance_keeps_legacy_identity_and_not_current_status(self):
+        source={'id':'metro_alerts','secret':'TEST_ALERT_KEY','url':'https://www.data.go.kr/data/15144070/openapi.do',
+                'endpoint':'https://apis.data.go.kr/B553766/ntce/getNtceList'}
+        item={'noftTtl':'열차운행 재개','noftCn':'과거 운행 재개 안내','noftOcrnDt':'2026-11-20T08:47:08',
+              'crtrYmd':'20261120','stnSctnCdLst':'0244','lineNmLst':'2호선','noftSeCd':'6','nonstopYn':'N'}
+        body=json.dumps({'response':{'header':{'resultCode':'00'},'body':{'items':{'item':[item]},'totalCount':1}}}).encode()
+        with tempfile.TemporaryDirectory() as d,patch.dict('os.environ',{'TEST_ALERT_KEY':'dummy-secret'}),patch('subway_crawler.missing_data.pipeline.Client.get',return_value=(200,{},body)):
+            first=alerts(source,{},Path(d))[0];second=alerts(source,{},Path(d))[0]
+            self.assertEqual(first['source_record_id'],second['source_record_id'])
+            old_keys=['source_id','event_type','title','content','published_at','effective_start','effective_end','line','direction','reference_date','source_url','service_status','issues']
+            self.assertEqual(first['source_record_id'],ident({k:first[k] for k in old_keys}))
+            self.assertEqual(first['source_station_codes'],'0244')
+            self.assertEqual(first['current_operation_status'],'NOT_VERIFIED')
+            self.assertEqual(first['notice_display_status'],'USABLE_REFERENCE')
+            paths=list(Path(d).rglob('*.json'));self.assertEqual(len(paths),1)
+            self.assertNotIn(b'dummy-secret',paths[0].read_bytes())
+
     def test_stopped_source_does_not_read_new_inputs_or_remove_old_records(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d);out=root/'new-state';out.mkdir()
