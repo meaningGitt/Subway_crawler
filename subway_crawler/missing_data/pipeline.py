@@ -167,7 +167,7 @@ def transfer_rows(source,receipt,root,stations):
         out.append(row)
     return out
 
-def alerts(source,previous):
+def alerts(source,previous,evidence_root=None):
     key=os.environ.get(source['secret'])
     if not key:raise AcquisitionError('DATA_GO_KR_SERVICE_KEY and 15144070 approval required','user_action')
     start=datetime.fromisoformat(previous.get('last_success',now()))-timedelta(days=7)
@@ -181,14 +181,26 @@ def alerts(source,previous):
             if str(data['header']['resultCode']) not in {'0','00'}:raise AcquisitionError('API authentication/application error','user_action')
             b=data['body'];items=b.get('items') or {};items=items.get('item',[]) if isinstance(items,dict) else items
             if isinstance(items,dict):items=[items]
-            for r in items:
-                title=r.get('noftTtl','');content=r.get('noftCn','')
+            if key.encode() in body:raise AcquisitionError('credential reflected in response; raw not persisted','schema')
+            raw_hash=hashlib.sha256(body).hexdigest()
+            if evidence_root is not None:atomic_write(Path(evidence_root)/'raw'/source['id']/f'{raw_hash}.json',body)
+            for source_row,r in enumerate(items,1):
+                title=r.get('noftTtl') or '';content=r.get('noftCn') or ''
                 if not re.search('시간표|운휴|운행|무정차|환승|통로|폐쇄|지연',title+' '+content):continue
-                rows.append(dict(source_id=source['id'],event_type='official_operation_notice',title=title,
+                row=dict(source_id=source['id'],event_type='official_operation_notice',title=title,
                     content=content,published_at=r.get('noftOcrnDt'),effective_start=r.get('xcseSitnBgngDt'),
                     effective_end=r.get('xcseSitnEndDt'),line=r.get('lineNmLst'),direction=r.get('upbdnbSe'),
                     reference_date=r.get('crtrYmd'),source_url=source['url'],service_status='NOT_USABLE',
-                    issues=['notice_not_linked_to_trip_and_timetable_version'],collected_at=now()))
+                    issues=['notice_not_linked_to_trip_and_timetable_version'],collected_at=now())
+                # Keep identity compatible with notices ingested before raw provenance was added.
+                row['source_record_id']=ident({k:v for k,v in row.items() if k!='collected_at'})
+                row.update(raw_sha256=raw_hash,source_page=page,source_row=source_row,
+                    source_endpoint=source['endpoint'],source_station_codes=r.get('stnSctnCdLst'),
+                    notice_type_code=r.get('noftSeCd'),nonstop_flag=r.get('nonstopYn'),
+                    notice_display_status='USABLE_REFERENCE',departure_planning_status='NOT_USABLE',
+                    current_operation_status='NOT_VERIFIED',
+                    interpretation='dated official notice; do not assume still active or link an affected train without evidence')
+                rows.append(row)
             if page*100>=int(b['totalCount']):return rows
         except (ValueError,KeyError,TypeError):raise AcquisitionError('API schema changed; no checkpoint advanced','schema') from None
     raise AcquisitionError('pagination safety bound reached; no checkpoint advanced','schema')
@@ -308,7 +320,7 @@ def run(args):
                     result.update(downloaded=False,license=meta['license']['name'],reason='metadata only; no timetable file download')
                 elif source['adapter']=='alerts':
                     if args.offline:raise AcquisitionError('offline: alerts API not attempted','retryable')
-                    records=alerts(source,old)
+                    records=alerts(source,old,out/'acquisition')
                 elif source['adapter']=='reviewed_inbox':
                     inbox=Path(args.inbox)
                     if not inbox.is_file():raise AcquisitionError('no permitted reviewed P1 inputs; search API/storage permission or review required','user_action')
@@ -369,7 +381,7 @@ def run(args):
           {'priority':'P0','item':'역·요일·방향 경로·종착지별 막차 후보','status':'DERIVED' if baseline.get('derived_count') else 'NOT_VERIFIED','action':'existing timetable only','limitation':'시행일·현행성 미확인; data/derived 별도 저장'},
           {'priority':'P0','item':'시간표 시행일·중간종착·야간 운행일','status':'NOT_VERIFIED','action':'no invented values','limitation':'원본 메타데이터 갱신일로 시행일 대체 금지'},
           {'priority':'P0','item':'환승 연결·방향·소요시간','status':'PARTIAL' if db.execute("SELECT 1 FROM records WHERE kind='transfer_connections'").fetchone() else 'NOT_VERIFIED','action':'official files; see source_registry actual results','limitation':'기준일 충돌·종료역 코드 의미 미확인 행은 NOT_USABLE'},
-          {'priority':'P0','item':'운행 변경·운휴·시설 변경 공지','status':'NOT_VERIFIED','action':'official alerts API adapter','limitation':'API 승인·키 필요; 타기관 공지 자동수집 허용 미확인'},
+          {'priority':'P0','item':'운행 변경·운휴·시설 변경 공지','status':'PARTIAL' if db.execute("SELECT 1 FROM records WHERE kind='timetable_updates' AND json_extract(payload,'$.event_type')='official_operation_notice'").fetchone() else 'NOT_VERIFIED','action':'official alerts API; actual success in source_registry','limitation':'서울교통공사 공지 범위만; 현재 유효기간·열차 연결·타기관 공지는 별도 확인'},
           {'priority':'P1','item':'신규 불편 사례','status':'STOPPED_BY_USER' if any(s['id']=='user_pain_points' and s.get('enabled') is False for s in registry) else 'PARTIAL','action':'preserve existing records; honor source enabled flag','limitation':'중단한 수집은 추가 입력 처리·재시도 대상에서 제외'},
           {'priority':'P2','item':'역 구조·출구 연결 시설','status':'DEFERRED','action':'priority gate','limitation':'P0 미완료; 중단된 P1은 완료 대기 조건에서 제외'},
           {'priority':'VERIFY','item':'인천 승하차·혼잡도','status':'NOT_VERIFIED','action':'excluded from recollection','limitation':'현재 확인한 스냅샷에서 해당 통계 근거 미확인; 부재를 미수집으로 단정하지 않음'}]
