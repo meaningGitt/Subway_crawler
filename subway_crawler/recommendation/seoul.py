@@ -30,10 +30,12 @@ def discover_seoul(source, client, body):
         months = re.findall(r'\bUSE_MM:\s*"(20\d{2}(?:0[1-9]|1[0-2]))"', grid.decode('utf-8'))
         if not months:
             raise AcquisitionError('Seoul grid contains no published month', 'schema')
-        month = max(months)
+        month = source.get('collection_period',max(months))
+        if not re.fullmatch(r'20\d{2}(?:0[1-9]|1[0-2])',month) or month>max(months):
+            raise AcquisitionError('invalid/unpublished requested period','schema')
         params.update(filterCol='USE_MM', txtFilter=month, gridTotalCnt='1000')
         meta.update(modified=month, period=month, download_url=endpoint, download_params=params,
-                    original_filename=f'{ident}_{month}.csv', grid_sha256=digest(grid))
+                    original_filename=f'{ident}_{month}.csv', grid_sha256=digest(grid) if not source.get('collection_period') else None)
         evidence = body+b'\n<!-- sheet UI -->\n'+view+b'\n<!-- public grid -->\n'+grid
     else:
         _, _, view = client.get(f'https://data.seoul.go.kr/dataList/fileView.do?infId={ident}&srvType=F')
@@ -43,7 +45,7 @@ def discover_seoul(source, client, body):
         for row in re.findall(r'<tr[^>]*>(.*?)</tr>', v, re.S):
             link = re.search(r"downloadFile\('(\d+)'\)", row)
             cells = [html.unescape(re.sub('<[^>]+>', '', c)).strip() for c in re.findall(r'<td[^>]*>(.*?)</td>', row, re.S)]
-            if link and len(cells) >= 5 and cells[1].endswith('.csv'):
+            if link and len(cells) >= 5 and cells[1].endswith(source.get('suffix','.csv')):
                 attachments.append((cells, link[1]))
         if source.get('filename_contains'):
             attachments = [a for a in attachments if source['filename_contains'] in a[0][1]]

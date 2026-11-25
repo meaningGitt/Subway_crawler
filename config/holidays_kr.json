@@ -1,0 +1,320 @@
+{
+  "years": [
+    2024,
+    2025,
+    2026
+  ],
+  "verified_on": "2026-11-10",
+  "definition": "공식 기념·대체·임시·선거 공휴일. 매주 반복되는 일요일은 weekday로 별도 구분하며 이 플래그에 포함하지 않음.",
+  "sources": [
+    "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024",
+    "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025",
+    "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026",
+    "https://www.kma.go.kr/kma/servlet/NeoboardProcess?bid=press2&mode=download&num=12820&fno=2",
+    "https://shinheung.icems.kr/boardCnts/fileDown.do?fileSeq=eb5336b430ffb300bf79b016ee96330c",
+    "https://www.mma.go.kr/board/boardView.do?gesipan_id=15&gsgeul_no=1518015&mc=mma0000392",
+    "https://www.mpm.go.kr/mpm/comm/newsPress/newsPressRelease/?boardId=bbs_0000000000000029&cntId=4250&mode=view"
+  ],
+  "dates": [
+    {
+      "date": "2024-01-01",
+      "name": "신정",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-02-09",
+      "name": "설날 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-02-10",
+      "name": "설날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-02-11",
+      "name": "설날 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-02-12",
+      "name": "설날 대체공휴일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-03-01",
+      "name": "삼일절",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-04-10",
+      "name": "국회의원선거",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-05-05",
+      "name": "어린이날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-05-06",
+      "name": "어린이날 대체공휴일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-05-15",
+      "name": "부처님오신날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-06-06",
+      "name": "현충일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-08-15",
+      "name": "광복절",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-09-16",
+      "name": "추석 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-09-17",
+      "name": "추석",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-09-18",
+      "name": "추석 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-10-01",
+      "name": "국군의날 임시공휴일",
+      "source_url": "https://www.mma.go.kr/board/boardView.do?gesipan_id=15&gsgeul_no=1518015&mc=mma0000392"
+    },
+    {
+      "date": "2024-10-03",
+      "name": "개천절",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-10-09",
+      "name": "한글날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2024-12-25",
+      "name": "기독탄신일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2024"
+    },
+    {
+      "date": "2025-01-01",
+      "name": "신정",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-01-27",
+      "name": "임시공휴일",
+      "source_url": "https://www.kma.go.kr/kma/servlet/NeoboardProcess?bid=press2&mode=download&num=12820&fno=2"
+    },
+    {
+      "date": "2025-01-28",
+      "name": "설날 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-01-29",
+      "name": "설날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-01-30",
+      "name": "설날 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-03-01",
+      "name": "삼일절",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-03-03",
+      "name": "삼일절 대체공휴일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-05-05",
+      "name": "어린이날·부처님오신날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-05-06",
+      "name": "부처님오신날 대체공휴일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-06-03",
+      "name": "대통령선거 임시공휴일",
+      "source_url": "https://shinheung.icems.kr/boardCnts/fileDown.do?fileSeq=eb5336b430ffb300bf79b016ee96330c"
+    },
+    {
+      "date": "2025-06-06",
+      "name": "현충일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-08-15",
+      "name": "광복절",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-10-03",
+      "name": "개천절",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-10-05",
+      "name": "추석 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-10-06",
+      "name": "추석",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-10-07",
+      "name": "추석 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-10-08",
+      "name": "추석 대체공휴일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-10-09",
+      "name": "한글날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2025-12-25",
+      "name": "기독탄신일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2025"
+    },
+    {
+      "date": "2026-01-01",
+      "name": "신정",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-02-16",
+      "name": "설날 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-02-17",
+      "name": "설날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-02-18",
+      "name": "설날 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-03-01",
+      "name": "삼일절",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-03-02",
+      "name": "삼일절 대체공휴일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-05-01",
+      "name": "노동절",
+      "source_url": "https://www.mpm.go.kr/mpm/comm/newsPress/newsPressRelease/?boardId=bbs_0000000000000029&cntId=4250&mode=view"
+    },
+    {
+      "date": "2026-05-05",
+      "name": "어린이날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-05-24",
+      "name": "부처님오신날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-05-25",
+      "name": "부처님오신날 대체공휴일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-06-03",
+      "name": "전국동시지방선거",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-06-06",
+      "name": "현충일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-07-17",
+      "name": "제헌절",
+      "source_url": "https://www.mpm.go.kr/mpm/comm/newsPress/newsPressRelease/?boardId=bbs_0000000000000029&cntId=4250&mode=view"
+    },
+    {
+      "date": "2026-08-15",
+      "name": "광복절",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-08-17",
+      "name": "광복절 대체공휴일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-09-24",
+      "name": "추석 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-09-25",
+      "name": "추석",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-09-26",
+      "name": "추석 연휴",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-10-03",
+      "name": "개천절",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-10-05",
+      "name": "개천절 대체공휴일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-10-09",
+      "name": "한글날",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    },
+    {
+      "date": "2026-12-25",
+      "name": "기독탄신일",
+      "source_url": "https://astro.kasi.re.kr/kor/life/post/calendarData?search_year=2026"
+    }
+  ]
+}

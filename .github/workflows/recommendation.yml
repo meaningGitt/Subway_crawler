@@ -13,6 +13,7 @@ jobs:
     env:
       TZ: Asia/Seoul
       PYTHONUNBUFFERED: '1'
+      DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -25,8 +26,19 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-analysis.txt
       - run: python -m pip install -r requirements-analysis.txt
+      - name: Run regression and v2 unit tests
+        run: python scripts/validate_v2.py --root "$RUNNER_TEMP/seat-data"
       - name: Collect official files and generate evidence
         run: python -m subway_crawler.recommendation run --root "$RUNNER_TEMP/seat-data" --inventory baseline/runtime/exports/kric_station_inventory.csv
+      - name: Validate actual data and update analysis report
+        if: ${{ always() }}
+        run: |
+          if [ -f "$RUNNER_TEMP/seat-data/latest.json" ]; then
+            python scripts/finalize_v2.py --root "$RUNNER_TEMP/seat-data"
+          else
+            echo "No completed snapshot to validate"
+            exit 1
+          fi
       - name: Publish data and diagnostics outside Git
         if: always()
         uses: actions/upload-artifact@v4
